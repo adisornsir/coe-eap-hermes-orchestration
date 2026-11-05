@@ -37,6 +37,7 @@ flowchart TB
 4. [Memory, learning and simulated mood](docs/04-memory-learning-mood.md)
 5. [MVP build plan and definition of done](docs/05-mvp-plan.md)
 6. [Selected references: MetaGPT (team) + Letta Code (memory)](docs/06-reference-project-adoption.md)
+7. [Lean operations: cost, security, improvement and portability](docs/07-operational-guardrails.md)
 
 ## Selected design references (keep MVP simple)
 
