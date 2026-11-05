@@ -1,40 +1,50 @@
-# 06 — Reference project adoption map (MVP)
+# 06 — Selected reference projects (MVP)
 
-> **Important: As of this design baseline, NO external project source code has been copied, vendored, installed, or integrated.** These are **design inspirations**, not dependencies. The only planned agent runtime is Hermes; none of the described connectors or adapters are implemented yet.
+> **Decision: use only two external design references — MetaGPT and Letta Code.** No upstream source code is imported, installed, forked, or integrated in this repository. They are **inspirations**, not runtime dependencies. Hermes is the sole planned agent runtime.
 
-## Reference → design decision → actual implementation boundary
+## The two references that matter
 
-| Reference | Relevant ideas | Where reflected in our design | MVP adoption | What NOT to do |
-|---|---|---|---|---|
-| [MetaGPT](https://github.com/FoundationAgents/MetaGPT) | Software-company roles, SOPs, tangible deliverables | `03-agent-team-design.md`: PM → BA/Tester → SA/Specialist → Dev → QA, handoff contracts | **Concept only**; implement role prompts / artifact templates on Hermes | Do not install MetaGPT runtime |
-| [ChatDev](https://github.com/OpenBMB/ChatDev) | Multi-role collaboration and review/feedback cycles | `03-agent-team-design.md`: task handoff, review failure loops | **Concept only**; asynchronous controller assignments | Do not introduce free-form agent-to-agent chat as source of truth |
-| [Letta Code](https://github.com/letta-ai/letta-code) | Persistent agent identity, evolving memory, reflection | `04-memory-learning-mood.md`: snapshot, per-role episodic lessons, versioned skills | **Concept only**; implement with native Hermes Memory/Skills + S3 versioning | Do not add a second stateful agent runtime or memory service without a demonstrated limitation |
-| [SoulLink](https://github.com/miyamoriaoi1997-del/Soul-Llink) | Persona, emotion expression and memory | `04-memory-learning-mood.md`: UI-facing simulated mood | **Evaluate only**; no dependency in MVP | Do not adopt until compatibility, security, license and operational fit have been verified |
-| [CrewAI](https://github.com/crewAIInc/crewAI) | Explicit workflows and orchestration | `01-architecture-options.md` + `03-agent-team-design.md`: deterministic stages | **Concept only**; small controller with explicit task states | Do not nest CrewAI inside Hermes for MVP |
-| [Emotion Engine](https://github.com/pioneerjeff-labs/emotion-engine) | Explainable emotion/appraisal models | `04-memory-learning-mood.md`: workload and success-driven mood | **Concept only**; simple rules computed from external evidence | No subjective feelings, no agent authority derived from mood |
+| Reference | Take this strength | Implement in Hermes MVP | Explicitly NOT adopting |
+|---|---|---|---|
+| [MetaGPT](https://github.com/FoundationAgents/MetaGPT) | Software-team roles, SOPs, work products and role handoffs | Five role profiles: **PM → BA/Tester → SA + Tech Specialist → Dev → BA/Tester**, with explicit deliverables, objective QA and human approval; see [Team Design](03-agent-team-design.md) | MetaGPT runtime, generic swarm, uncontrolled agent chat |
+| [Letta Code](https://github.com/letta-ai/letta-code) | Persistent identity and long-lived learning from work experience | Hermes-native memory/skills plus role-isolated, versioned S3 snapshots and reviewed reflections; see [Memory/Learning/Mood](04-memory-learning-mood.md) | A second agent runtime, separate Letta server or mandatory memory backend |
 
-## What is actually reused in MVP?
+## Mood: build a tiny in-house rule, NOT another dependency
 
-**Planned actual dependency:** Hermes runtime and its native profile, memory and skill mechanisms (exact version to be pinned and validated in Sprint 0).
+Use **validated first-pass acceptance, on-time delivery and weighted utilization**. Show a derived simulated expression (e.g. 🙂 balanced, 😟 needs improvement, 😰 over capacity), supporting numbers, sample size and reason. Small sample => 'insufficient data'. This is operational feedback, **not genuine emotion** and never gives additional privilege. No SoulLink or Emotion Engine runtime/code is required.
 
-**Planned existing integrations:** LiteLLM (model access, spend), OpenProject (work-item management), GitHub (code, PRs, CI) and AWS ECS/S3/DynamoDB/CloudWatch. These are target design decisions, **not deployed or integrated by this repository**.
+## Minimal target composition
 
-**Build small ourselves:** (a) deterministic controller adapter for task assignment, lock, retry and approval; (b) artifact contracts; (c) role-specific Hermes profile templates and permissions; (d) a memory snapshot promotion wrapper; (e) pure rule-based KPI/Mood calculator. These should be small ordinary modules rather than an additional AI framework.
+```mermaid
+flowchart TB
+  Owner["Human Owner: Goals / Approval"] --> PM["Hermes Gateway + PM profile"]
+  PM --> Ctrl["Thin deterministic controller"]
+  Ctrl --> Roles["Hermes Worker Profiles: BA/Tester, SA, Dev, Specialist"]
+  Meta["MetaGPT ideas: Roles + SOP + Artifacts"] -.-> Roles
+  Letta["Letta Code ideas: Identity + Learning"] -.-> Mem["Hermes Memory / Skills + S3 versioned snapshots"]
+  Roles <--> Mem
+  Ctrl --> Mood["Simple KPI / Mood rules"]
+  Ctrl --> Sources["OpenProject + GitHub + LiteLLM"]
+```
 
-## Recommended adoption sequence
+- **MVP dependencies:** Hermes, existing LiteLLM/OpenProject/GitHub; AWS ECS Fargate, S3, DynamoDB and CloudWatch.
+- **Write only thin glue:** controller (task/state/locks/approval), role profiles, artifact contracts, snapshot wrapper and rule-based KPI/Mood calculator.
+- **No extra AI orchestrator:** no MetaGPT, CrewAI or ChatDev execution process.
+- **No extra emotion/memory framework:** do not install SoulLink, Emotion Engine or Letta runtime.
+- **One project / one feature / one active execution per role** for the first pilot.
 
-1. **MVP P0 — roles/workflow:** convert MetaGPT/ChatDev patterns to five Hermes role prompts with one artifact-based stage machine. First deliver an Owner-approved PR.
-2. **MVP P1 — identity/learning:** use Hermes native memory and skills; persist *approved* snapshots in S3 and keep learning/reflection evidence. Examine Letta concepts for later improvements.
-3. **MVP P1 — simulated emotions:** compute first-pass acceptance rate and 7-day workload fit from OpenProject/CI/Owner reviews. Display mood labels and rationale; keep it outside permissions/approvals. Use SoulLink/Emotion Engine as **reading references**, not copied components.
-4. **Post-MVP — selective evaluation:** only run a sandbox spike to adopt SoulLink or a dedicated memory engine if actual constraints justify it; review current upstream version, license and dependencies first.
+## Implementation priorities
 
-## Before importing code from any upstream project
+1. **P0: MetaGPT-inspired team workflow** on Hermes: 5 roles, SOP, input/output artifacts, GitHub PR + CI, Owner accepts/rejects.
+2. **P0: Hermes-native memory survives restart**: role identity, memory and skills restored from isolated approved snapshot; no multi-writer `state.db`.
+3. **P1: Letta-inspired improvement loop**: reflect on CI/QA/Owner evidence, propose lesson/skill changes, test and approve before promotion.
+4. **P1: Internal KPI/Mood engine**: deterministic simple formulas with evidence, utilization target hypothesis, sample size and trend.
 
-Create an ADR covering:
-- exact commit/tag and license, transitive dependencies, maintenance status, vulnerabilities
-- compatibility with pinned Hermes version and ECS Fargate
-- data sharing/privacy implications (memory, telemetry, credentials)
-- benchmark against the built-in Hermes/our simple solution
-- migration/rollback path and measurable benefit
+## Usage classification and gates
 
-**Decision:** prefer **reference-driven design** over multi-framework integration. No source code reuse is claimed.
+- **Reference design:** MetaGPT and Letta Code only.
+- **Runtime dependency:** Hermes only (pin and verify release before implementation).
+- **Our code:** controller, state/locks, snapshots, data contracts and KPI/Mood rules.
+- **Future optional imports:** require an ADR with license/version/security checks and measured advantages over native Hermes; not part of MVP.
+
+**Status:** Target design, not deployed or implemented.
