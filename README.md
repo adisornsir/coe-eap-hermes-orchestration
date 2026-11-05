@@ -36,7 +36,13 @@ flowchart TB
 3. [Team workflow, roles and contracts](docs/03-agent-team-design.md)
 4. [Memory, learning and simulated mood](docs/04-memory-learning-mood.md)
 5. [MVP build plan and definition of done](docs/05-mvp-plan.md)
-6. [Reference projects: inspiration vs actual integration](docs/06-reference-project-adoption.md)
+6. [Selected references: MetaGPT (team) + Letta Code (memory)](docs/06-reference-project-adoption.md)
+
+## Selected design references (keep MVP simple)
+
+- **MetaGPT:** take only software-team SOP, role handoffs and required artifacts; **do not install MetaGPT**.
+- **Letta Code:** take only persistent identity / learning ideas; implement using **native Hermes memory & skills** with versioned role snapshots; **do not install Letta**.
+- **Mood:** implement a small rule-based KPI display from verified QA success and workload; **no third-party emotion engine**.
 
 ## Non-negotiable rules
 
