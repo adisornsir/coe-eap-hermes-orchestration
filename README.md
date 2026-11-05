@@ -36,6 +36,7 @@ flowchart TB
 3. [Team workflow, roles and contracts](docs/03-agent-team-design.md)
 4. [Memory, learning and simulated mood](docs/04-memory-learning-mood.md)
 5. [MVP build plan and definition of done](docs/05-mvp-plan.md)
+6. [Reference projects: inspiration vs actual integration](docs/06-reference-project-adoption.md)
 
 ## Non-negotiable rules
 
