@@ -1,62 +1,74 @@
-# Hermes AI Software Delivery Team — MVP Architecture
+# Hermes AI Software Company — six-stage SDLC orchestration
 
-> **Status:** Design baseline / not deployed. **Owner:** Human Product Owner. **Target:** AWS ECS Fargate + Hermes Agent + LiteLLM + OpenProject + GitHub.
+> **STATUS: Architecture and implementation plans only — NOT deployed or implemented.**  
+> **Design baseline: 2026-11-05.** **Owner:** Human Founder / Product Owner.  
+> **Target:** Portable, evidence-driven AI software team; local/sandbox 2-day MVP, then AWS ECS Fargate Full architecture.
 
-สร้าง **1 AI software squad** ที่ทำงานได้จริง โดย Owner เป็นมนุษย์ 1 คน และมี AI 5 roles ได้แก่ **PM, BA/Tester, Solution Architect, Developer, Tech Specialist**. ทุก Agent มี identity, memory, learning history และ *simulated mood* ที่อิงคุณภาพและภาระงาน ไม่ใช่อารมณ์จริง
+## Decision
 
-## Recommended decision
+One **Human Founder/Owner** + one **deterministic Hermes Orchestrator** + **six logical core AI roles** + a narrow **on-demand Specialist Pool**. The orchestrator is workflow software, **not an extra reasoning role or approval authority**. Role count is **not** a count of always-on servers.
 
-**Option B — Lean Fargate Team**: 1 persistent Hermes Gateway/PM + ephemeral **one task per work item** for other roles; use an intentionally small deterministic controller, DynamoDB task/role locks, S3 snapshots/artifacts and existing LiteLLM / OpenProject / GitHub. **No SQS, Step Functions, vector DB, GPU EC2, custom dashboard, or multi-tenant SaaS in MVP.**
-
-การเริ่มต้นจริงควรทำด้วย **one project, one feature, one active task per role** (multi-project is a later design capability, not a launch promise).
+**Six AI roles:** PM/BA · Solution Architect · Developer · QA/Tester · Independent Reviewer · DevOps/SRE.  
+**Six SDLC processes:** **Plan → Design → Build → Test → Deploy → Maintain → Plan** (continuous feedback).
 
 ```mermaid
-flowchart TB
-    O["Human Owner — goals / approval"] --> G["Hermes Gateway + PM — persistent ECS Service"]
-    G --> C["Thin controller — state machine / dispatch / limits"]
-    C --> DB[("DynamoDB — tasks / locks / metrics")]
-    C --> ECS["ECS RunTask — ephemeral worker per assignment"]
-    ECS --> BA["BA / Tester profile"]
-    ECS --> SA["SA profile"]
-    ECS --> DEV["Dev profile"]
-    ECS --> TS["Tech Specialist profile"]
-    ECS <--> S3[("S3 — isolated profile snapshots + artifacts")]
-    G <--> OP["OpenProject — business task source"]
-    ECS <--> GH["GitHub — design, code, PRs, evidence"]
-    G --> L["LiteLLM — governed model routing"]
-    ECS --> L
-    G --> CW["CloudWatch"]
-    ECS --> CW
+flowchart LR
+ H["Human Owner: goals / budget / approval"] --> O["Hermes Controller: workflow / routing / policy gates"]
+ O --> P["PLAN: PM/BA"]
+ P --> D["DESIGN: SA"]
+ D --> B["BUILD: Dev"]
+ B --> T["TEST: QA"]
+ T --> X["DEPLOY: Reviewer + DevOps/SRE"]
+ X --> M["MAINTAIN: DevOps/SRE"]
+ M --> P
+ O -. scoped specialist consultation .-> SP["Security / UX / DBA / Cloud / Performance"]
+ O --- SH["LiteLLM / GitHub / OpenProject / artifacts / audit"]
 ```
 
-## Read in order
+**Key rule:** the AI Independent Reviewer generates risk/quality findings, **not a binding human approval**. Owner, named code owner, policy owner and release manager remain accountable for their designated approval gates. Tests, policies and CI are mandatory external checks, not self-assertions by an agent.
 
-1. [Architecture alternatives and decision](docs/01-architecture-options.md)
-2. [Target architecture and runtime boundaries](docs/02-target-architecture.md)
-3. [Team workflow, roles and contracts](docs/03-agent-team-design.md)
-4. [Memory, learning and simulated mood](docs/04-memory-learning-mood.md)
-5. [MVP build plan and definition of done](docs/05-mvp-plan.md)
-6. [Selected references: MetaGPT (team) + Letta Code (memory)](docs/06-reference-project-adoption.md)
-7. [Lean operations: cost, security, improvement and portability](docs/07-operational-guardrails.md)
+## Two implementation phases
 
-## Selected design references (keep MVP simple)
+| | Phase 1 — **MVP (hard 2 working days / 16 engineer-hours)** | Phase 2 — **FULL (complete target design)** |
+|---|---|---|
+| Goal | One bounded, traceable 6-stage demo feature with a real PR/test run | Secure, durable AI-operated SDLC, including closed-loop maintenance |
+| Runtime | Local/sandbox single-process sequential controller, reusable role profiles | Hermes Gateway + Fargate worker RunTask, DynamoDB locks/idempotency, S3 artifacts |
+| Roles | 6 logical role profiles; one worker implementation; on-demand specialists not required | 6 isolated roles, specialists and governed concurrency |
+| Workflow | Markdown/JSON artifact handoffs, manual human gates, QA and independent review | OpenProject integration, stage gates, CI/evals, incident-triggered loops, telemetry |
+| Memory | Static instructions, bounded run history, proposed lessons only | Versioned per-role/project snapshots, approved skill promotion, simulations of mood based on measured outcomes |
+| Deploy | PR + DEV/demo validation only; **no production deploy** | Per-environment privileges, human-authorized production release and tested rollback |
+| Completion proof | Real artifact chain, tests, branch/PR, approval audit and negative gate tests | Security/reliability/incident/learning/portability end-to-end test suite |
 
-- **MetaGPT:** take only software-team SOP, role handoffs and required artifacts; **do not install MetaGPT**.
-- **Letta Code:** take only persistent identity / learning ideas; implement using **native Hermes memory & skills** with versioned role snapshots; **do not install Letta**.
-- **Mood:** implement a small rule-based KPI display from verified QA success and workload; **no third-party emotion engine**.
+**2-day MVP is a timeboxed plan, not a commitment to build everything from the Full architecture in 2 days.** It assumes existing Hermes, LiteLLM and GitHub access; blocked or mocked integrations must be disclosed. The Full architecture can use existing AWS/managed components but should add new services only when justified by measured need.
 
-## Non-negotiable rules
+## Read first — authoritative plans
 
-- Human Owner approves scope and production release; agents do not spend money, merge or deploy production autonomously.
-- **Never mount one writable Hermes home/profile into two running agent processes.** One role execution at a time in MVP; use role/project namespace and versioned snapshot.
-- `SOUL.md`/prompts are guidance, **not isolation controls**. Enforce least privilege with IAM, GitHub permissions and separate credentials.
-- Quality and review are measured from CI, PRs, OpenProject and Owner decisions — **not agent self-report**.
-- Mood is a **derived UI expression**; it cannot bypass controls or override planning priority.
-- Document contains architecture and examples, **not a production-ready deployment**.
+1. [08 — Six-stage target workflow and role contracts](docs/08-six-stage-role-target.md)
+2. [09 — Two-day MVP hour-by-hour execution plan and Definition of Done](docs/09-mvp-two-day-execution.md)
+3. [10 — Full implementation roadmap, waves F0–F5 and acceptance](docs/10-full-implementation-roadmap.md)
 
-## References
+## Original reference designs (retained as detailed background)
 
-- [Hermes Profiles](https://hermes-agent.nousresearch.com/docs/user-guide/profiles/)
-- [Hermes Persistent Memory](https://hermes-agent.nousresearch.com/docs/user-guide/features/memory/)
-- [Hermes Skills](https://hermes-agent.nousresearch.com/docs/user-guide/features/skills/)
-- [ECS storage options](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/using_data_volumes.html)
+- [01 — Architecture alternatives](docs/01-architecture-options.md)
+- [02 — Lean AWS runtime](docs/02-target-architecture.md)
+- [03 — Earlier five-role design (superseded by 08)](docs/03-agent-team-design.md)
+- [04 — Memory, learning and simulated mood (Full)](docs/04-memory-learning-mood.md)
+- [05 — Earlier multi-sprint MVP plan (superseded by 09)](docs/05-mvp-plan.md)
+- [06 — Selected references: MetaGPT + Letta ideas without new runtimes](docs/06-reference-project-adoption.md)
+- [07 — Operations, cost, security and portability guardrails](docs/07-operational-guardrails.md)
+
+Where older docs refer to **five roles**, combined BA/Tester, the PM/Gateway as a single AI role, or a multi-sprint MVP, **08/09/10 supersede those counts, role assignments and MVP deadline**. Remaining AWS isolation, budget and memory safeguards still inform Full.
+
+## Non-negotiable boundaries
+
+- Owner sets priorities, budget, acceptance and production scope; protected merges and release gates require the *designated human* approver.
+- Developer cannot approve own changes; QA cannot silently weaken acceptance tests; AI Reviewer cannot authorize a protected merge.
+- Agent profiles, role prompts and skills are **guidance, not security sandboxes**. Use real IAM/tool permissions, secrets isolation, branch protection, and managed approval gates.
+- Never run two processes writing the same Hermes home/database; use isolated project/role snapshots and locks in Full.
+- No uncontrolled network/production access, no silent self-learning of privileged policies, no standing production secrets.
+- Simulated mood is a transparent KPI visualization only, never a safety, budget or approval signal.
+- Every stage advances only with recorded artifact evidence; do not claim a feature is done based on agent text.
+
+## Source inspiration
+
+Based on the user-provided *The AI-Native SDLC Playbook* (Anthropic): Plan, Design, Build, Test, Deploy, Maintain; handoffs via versioned intent/spec/plan/code/test/review/incident artifacts and human accountability. Hermes-specific six-role architecture and the phase split are project design decisions, **not** prescriptions made by the playbook.
