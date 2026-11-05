@@ -59,6 +59,14 @@ flowchart LR
 
 Where older docs refer to **five roles**, combined BA/Tester, the PM/Gateway as a single AI role, or a multi-sprint MVP, **08/09/10 supersede those counts, role assignments and MVP deadline**. Remaining AWS isolation, budget and memory safeguards still inform Full.
 
+## Execution issues (implementation backlog)
+
+- **MVP Day 1:** [#2 — preflight, six role contracts, controller, Plan/Design](https://github.com/adisornsir/coe-eap-hermes-orchestration/issues/2) — 8 hours.
+- **MVP Day 2:** [#3 — Build/Test/Review/Deploy prep/Maintain](https://github.com/adisornsir/coe-eap-hermes-orchestration/issues/3) — 8 hours.
+- **Full roadmap:** [F0 #4](https://github.com/adisornsir/coe-eap-hermes-orchestration/issues/4) → [F1 #5](https://github.com/adisornsir/coe-eap-hermes-orchestration/issues/5) → [F2 #6](https://github.com/adisornsir/coe-eap-hermes-orchestration/issues/6) → [F3 #7](https://github.com/adisornsir/coe-eap-hermes-orchestration/issues/7) → [F4 #8](https://github.com/adisornsir/coe-eap-hermes-orchestration/issues/8) → [F5 #9](https://github.com/adisornsir/coe-eap-hermes-orchestration/issues/9). Ship required high-impact controls before enabling protected operations regardless of wave order.
+
+**All issues are planned, not implemented.** Work should start after architecture baseline approval and the prerequisite access checks.
+
 ## Non-negotiable boundaries
 
 - Owner sets priorities, budget, acceptance and production scope; protected merges and release gates require the *designated human* approver.
