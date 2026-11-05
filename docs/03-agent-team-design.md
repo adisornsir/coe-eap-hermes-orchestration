@@ -1,3 +1,7 @@
+> **SUPERSEDED ROLE BASELINE — 2026-11-05:** This document describes the original five-role team and is preserved for historical reference only. **Current authority** is [08 — six-stage/six-role target](08-six-stage-role-target.md): PM/BA, Solution Architect, Developer, QA/Tester, Independent Reviewer, DevOps/SRE; specialist on demand; Orchestrator is separate deterministic software. See [09 MVP](09-mvp-two-day-execution.md) and [10 Full](10-full-implementation-roadmap.md).
+
+---
+
 # 03 — AI team design and workflow
 
 ## One owner + five AI roles
