@@ -2,6 +2,10 @@
 
 > **Phase: FULL / no two-day limit.** Follows [target roles and workflow](08-six-stage-role-target.md) and starts from an evidence-backed [two-day MVP](09-mvp-two-day-execution.md). This is a **delivery plan, not proof that infrastructure or software exists**. Full scope covers the original Hermes/AWS/memory/mood design plus six-role review separation and the AI-native six-stage loop.
 
+## Skills adoption decision
+
+Use [11 — selective vtno/skills integration](11-vtno-skills-adoption.md) as the procedure layer for existing roles, not as a new platform. F0 freezes reviewed skill schema/provenance; F2 adds two-axis Standards/Spec review and bounded author–review loops; F3 enforces tool allowlists, source/license verification, immutability and approval outside Skills; F4 adds regression evals, skill promotion/rollback and measured selection quality. Reviewer findings remain advisory until deterministic gates and named human code-owner controls take effect. Keep all upstream skill/script fetches out of production task execution.
+
 ## Full end state
 
 - One Human Founder/Product Owner controls goal, prioritization, budget, exceptions and final production decisions.
