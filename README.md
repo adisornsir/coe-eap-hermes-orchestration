@@ -41,6 +41,10 @@ flowchart LR
 
 **2-day MVP is a timeboxed plan, not a commitment to build everything from the Full architecture in 2 days.** It assumes existing Hermes, LiteLLM and GitHub access; blocked or mocked integrations must be disclosed. The Full architecture can use existing AWS/managed components but should add new services only when justified by measured need.
 
+## Adopted ideas from vtno/skills
+
+[11 — Selective Skills adoption and safety plan](docs/11-vtno-skills-adoption.md) adds **one planned PR per task**, a **separate independent Reviewer**, **Standards versus Spec** review, bounded retry and skill provenance. No new role, service or extra MVP day is required. This design references [vtno/skills](https://github.com/vtno/skills) at a pinned commit; it **does not install or vendor third-party code**.
+
 ## Read first — authoritative plans
 
 1. [08 — Six-stage target workflow and role contracts](docs/08-six-stage-role-target.md)
