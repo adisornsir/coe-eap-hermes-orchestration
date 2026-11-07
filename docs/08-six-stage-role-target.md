@@ -27,6 +27,10 @@ flowchart TD
  OBS -->|"incident -> new intent"| PM
 ```
 
+## Skills are procedures, not roles or authority
+
+The five skills studied in [11 — selective vtno/skills adoption](11-vtno-skills-adoption.md) strengthen **how** existing roles execute tasks, without adding new AI roles or changing the six-stage controller. The adaptation prioritizes one bounded implementation PR, independent two-axis review (**Standards** and **Spec**), caller-defined interfaces and reproducible tests. The task envelope may include `skill_id` and `skill_version` or a Git SHA for evidence; those fields are **not** permissions. The controller, role tool policy, QA evidence and named human approval retain authority. Do not install upstream skills into workers automatically or execute downloaded scripts.
+
 ## Role contracts
 
 | Role ID | Mission / accountable deliverable | Inputs | Outputs | Hard boundaries |
