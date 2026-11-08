@@ -1,3 +1,7 @@
+> **RETAINED GUARDRAILS / NEW PHASING — 2026-11-05:** Keep these cost, security, portability and reliability principles. The original five-role enumeration and Fargate-as-immediate-MVP assumptions are historical. For the current six roles and two-day local MVP versus Full AWS runtime see [08](08-six-stage-role-target.md), [09](09-mvp-two-day-execution.md) and [10](10-full-implementation-roadmap.md).
+
+---
+
 # 07 — Lean operations, cost, security and portability guardrails
 
 > **Decision status:** Recommended design baseline, not implemented. **Goal:** keep the Hermes AI software squad cheap to run, easy to operate, safe to improve and replaceable at each integration boundary. Default: do not introduce new infrastructure without measured need.

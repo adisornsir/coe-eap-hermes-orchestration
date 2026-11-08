@@ -1,3 +1,7 @@
+> **SUPERSEDED MVP PLAN — 2026-11-05:** This multi-sprint five-role implementation plan is historical, **not the active MVP commitment**. The active scope is **a strict two-working-day/16-engineer-hour local/sandbox MVP**, documented in [09 — two-day execution](09-mvp-two-day-execution.md); the remainder moves to [10 — Full roadmap](10-full-implementation-roadmap.md). The six-role design is [08](08-six-stage-role-target.md).
+
+---
+
 # 05 — MVP delivery plan, acceptance and guardrails
 
 ## Outcome

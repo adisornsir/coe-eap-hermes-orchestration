@@ -1,3 +1,7 @@
+> **DESIGN HISTORY / RUNTIME REFERENCE — 2026-11-05:** The AWS component choices and isolation guidance below remain a reference for **FULL**. However, the five-role and combined PM/Gateway agent descriptions are superseded by [six-role target](08-six-stage-role-target.md); MVP runtime is now the [two-day local/sandbox slice](09-mvp-two-day-execution.md). Do not treat the older diagram as the two-day delivery commitment.
+
+---
+
 # 02 — Target architecture (lean MVP)
 
 ## Logical and AWS deployment diagram
