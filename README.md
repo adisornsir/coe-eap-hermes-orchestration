@@ -45,6 +45,12 @@ flowchart LR
 
 [11 — Selective Skills adoption and safety plan](docs/11-vtno-skills-adoption.md) adds **one planned PR per task**, a **separate independent Reviewer**, **Standards versus Spec** review, bounded retry and skill provenance. No new role, service or extra MVP day is required. This design references [vtno/skills](https://github.com/vtno/skills) at a pinned commit; it **does not install or vendor third-party code**.
 
+## Visual diagram skill — Diagram Design
+
+[12 — Diagram Design adoption](docs/12-diagram-design-adoption.md) maps the optional visualization skill to all six SDLC stages and defines source-traceability, offline/no-external-font rendering, security checks, and the Full-phase governed rollout. See the [self-contained six-stage HTML/SVG overview](examples/diagrams/ai-native-sdlc-six-stage.html) (open locally in a browser).
+
+**MVP remains 2 days / 16 hours:** diagram generation is optional P1, never a substitute for tests, Independent Reviewer findings or human approvals. Upstream [cathrynlavery/diagram-design](https://github.com/cathrynlavery/diagram-design) was reviewed at a pinned commit; its package was **not installed or executed** in this PR.
+
 ## Read first — authoritative plans
 
 1. [08 — Six-stage target workflow and role contracts](docs/08-six-stage-role-target.md)
