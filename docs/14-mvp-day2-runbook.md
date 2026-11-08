@@ -51,3 +51,8 @@ The \`plan.md\` file must be an accepted implementation plan prepared separately
 - \`demo_app/health.py\` is only a small read-only function used by the test suite; it is not an HTTP server.
 - The actual six-stage external integration run remains **BLOCKED** until corporate LiteLLM access, code PR verification, human approval and environment privileges are checked.
 - Full phase adds durable state, authenticated external approvals, locked immutable evidence, real GitHub/OpenProject connectors, DevOps/SRE monitoring and safe deployment tools. See [Full roadmap](10-full-implementation-roadmap.md).
+
+
+## Skills used by the Day 2 workflow
+
+The Developer's `implementation-step` and `engineering-constraints` skills are explicitly resolved and their versions recorded as **recommended** on an existing commit, not claimed to have generated that commit. The independent Reviewer actually loads `two-axis-review` (reviewed local Markdown with SHA-256 provenance) into its model prompt; it cannot run arbitrary scripts or approve the PR. Review retries stop after two invocations (initial + one re-review). A remaining important finding is escalated for human decision.

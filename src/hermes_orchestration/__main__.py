@@ -5,6 +5,7 @@ import sys
 from pathlib import Path
 from .core import LocalStore, WorkflowError, ROLES
 from .model import invoke_role, ModelConfigurationError
+from .skills import augment_role_instruction
 
 
 def parser() -> argparse.ArgumentParser:
@@ -49,13 +50,17 @@ def main(argv: list[str] | None = None) -> int:
             if not role_path.is_file():
                 raise WorkflowError("Missing reviewed role profile: " + role)
             previous = (store.item_dir(args.id) / "intent.md").read_text(encoding="utf-8") if stage == "DESIGN" else ""
+            instruction, versions = augment_role_instruction(
+                role_path.read_text(encoding="utf-8"), stage, role
+            )
             if args.dry_run:
                 text, model, mode = "# MOCK ONLY: not real evidence\n\n" + state["objective"], "none", "mock"
             else:
-                text, model = invoke_role(role_instruction=role_path.read_text(encoding="utf-8"),
+                text, model = invoke_role(role_instruction=instruction,
                                           objective=state["objective"], input_text=previous)
                 mode = "live"
-            result = store.record(args.id, text, role=role, mode=mode, model=model)
+            result = store.record(args.id, text, role=role, mode=mode, model=model,
+                                  evidence={"skills": versions})
         else:
             raise WorkflowError("Unknown command")
         print(json.dumps({"id": result["work_item_id"], "stage": result["stage"],

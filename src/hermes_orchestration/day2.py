@@ -9,6 +9,7 @@ import sys
 from pathlib import Path
 from .core import LocalStore, WorkflowError
 from .model import invoke_role, ModelConfigurationError
+from .skills import augment_role_instruction, load_approved
 
 PR_PATTERN = re.compile(r"^https://github\.com/[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+/pull/[0-9]+$")
 SHA_PATTERN = re.compile(r"^[a-f0-9]{40}$")
@@ -26,7 +27,13 @@ def build(store: LocalStore, item_id: str, *, plan: str, commit_sha: str) -> dic
     _require_stage(store, item_id, "BUILD")
     if not SHA_PATTERN.fullmatch(commit_sha):
         raise WorkflowError("A real full git commit SHA is required")
-    return store.record(item_id, plan, role="dev", mode="live", evidence={"commit_sha": commit_sha, "source": "external_git_commit_not_verified"})
+    # Build remains manual in the MVP: these recipes are recommended and pinned,
+    # but are NOT claimed to have executed automatically.
+    suggested = [s.provenance for s in load_approved("BUILD", "dev")]
+    return store.record(item_id, plan, role="dev", mode="live",
+                        evidence={"commit_sha": commit_sha,
+                                  "source": "external_git_commit_not_verified",
+                                  "recommended_skills": suggested})
 
 
 def qa_tests(store: LocalStore, item_id: str, *, repo: Path, timeout: int = 120) -> dict:
@@ -48,6 +55,11 @@ def qa_tests(store: LocalStore, item_id: str, *, repo: Path, timeout: int = 120)
 def review(store: LocalStore, item_id: str, *, repo: Path, base: str = "main") -> str:
     """Read-only independent AI report; never edits or approves source."""
     state = _require_stage(store, item_id, "DEPLOY")
+    review_meta = store.item_dir(item_id) / "review-meta.json"
+    previous = json.loads(review_meta.read_text(encoding="utf-8")) if review_meta.is_file() else {}
+    attempts = int(previous.get("attempts", 0))
+    if attempts >= 2:
+        raise WorkflowError("Review budget exhausted: initial review + one re-review only")
     if not re.fullmatch(r"[A-Za-z0-9_./-]{1,100}", base) or base.startswith("-"):
         raise WorkflowError("Unsafe base ref")
     cmd = ["git", "diff", f"{base}...HEAD", "--", "src", "tests", "demo_app"]
@@ -58,14 +70,18 @@ def review(store: LocalStore, item_id: str, *, repo: Path, base: str = "main") -
         raise WorkflowError("Diff too large for MVP review; require human review")
     profile = (repo / "roles/reviewer/SOUL.md").read_text(encoding="utf-8")
     spec = (store.item_dir(item_id) / "spec.md").read_text(encoding="utf-8")
-    instruction = profile + "\nOutput sections ## Standards and ## Spec. Identify blockers explicitly."
+    instruction, selected_skills = augment_role_instruction(profile, "DEPLOY", "reviewer")
+    instruction += "\nOutput sections ## Standards and ## Spec. Identify blockers explicitly."
     report, model = invoke_role(role_instruction=instruction, objective=state["objective"], input_text="SPEC:\n" + spec + "\nDIFF:\n" + result.stdout)
     if "## Standards" not in report or "## Spec" not in report:
         raise WorkflowError("Reviewer omitted required separate Standards/Spec sections")
     path = store.item_dir(item_id) / "review-report.md"
     path.write_text(report, encoding="utf-8")
     digest = hashlib.sha256(report.encode()).hexdigest()
-    (store.item_dir(item_id) / "review-meta.json").write_text(json.dumps({"sha256": digest, "model": model, "source": "model_only", "base": base}), encoding="utf-8")
+    review_meta.write_text(json.dumps({"sha256": digest, "model": model,
+                                       "source": "model_only", "base": base,
+                                       "attempts": attempts + 1,
+                                       "skills": selected_skills}), encoding="utf-8")
     return digest
 
 
