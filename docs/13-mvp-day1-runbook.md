@@ -45,3 +45,10 @@ Provider route: by default the adapter posts to \`<base>/v1/chat/completions\` (
 - Missing credentials cannot be substituted silently with \`--dry-run\`. Report real integration as BLOCKED if needed.
 
 **Next:** [Issue #3](https://github.com/adisornsir/coe-eap-hermes-orchestration/issues/3) introduces Build/Test/Review/DEV-release/Maintain evidence and negative tests.
+
+
+## Reviewed Skills integration (no upstream install)
+
+This PR now includes a **read-only, stage/role allowlisted** loader in `src/hermes_orchestration/skills.py`. It selects original local instructions modelled on ideas from `vtno/skills`, checks metadata, records SHA-256 provenance, and appends the selected instructions to the **PLAN/DESIGN** prompt. A missing or corrupted required skill blocks execution. No third-party skill source, script or installer is run.
+
+PLAN uses `requirements-writing`; DESIGN uses `requirements-writing` and `engineering-constraints`. BUILD and independent DEPLOY review are mapped for the stacked Day 2 PR. These instructions do not enforce permissions or human approval; the state machine and external policy remain authoritative. Run `PYTHONPATH=src python -m unittest discover -s tests -v` to verify loader failure cases.
