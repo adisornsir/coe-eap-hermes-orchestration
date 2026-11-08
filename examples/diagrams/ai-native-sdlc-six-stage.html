@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hermes — AI-Native SDLC Six-Stage Loop</title>
+<meta name="description" content="Offline self-contained overview of six Hermes SDLC stages, accountable roles, handoff artifacts and human gates.">
+<style>
+:root{color-scheme:light;--paper:#f6f6f2;--ink:#252d36;--muted:#6f7b81;--rule:#cfd5d1;--accent:#bc512f;--link:#407b80}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:Arial,Helvetica,sans-serif}
+main{max-width:1480px;margin:0 auto;padding:24px}
+svg{display:block;width:100%;height:auto;border:1px solid var(--rule);background:#f6f6f2}
+h1{font-size:1px;position:absolute;left:-9999px}
+.note{font-size:13px;color:#4c5b60;max-width:1120px;line-height:1.5;margin:12px 0}
+@media print{main{padding:0}svg{border:0}.note{display:none}}
+</style>
+</head>
+<body>
+<main>
+<h1>Hermes AI-Native SDLC: six process loop</h1>
+<svg viewBox="0 0 1440 700" role="img" aria-labelledby="dTitle dDesc" xmlns="http://www.w3.org/2000/svg">
+<title id="dTitle">Hermes six-stage AI-native SDLC loop</title>
+<desc id="dDesc">Plan, Design, Build, Test, Deploy and Maintain connect in order, with Maintain returning to Plan. Plan is led by PM/BA, Design by SA, Build by Developer, Test by QA, Deploy by Reviewer and DevOps/SRE, and Maintain by DevOps/SRE. Human scope and production release approvals remain mandatory.</desc>
+<defs>
+ <pattern id="dots" width="24" height="24" patternUnits="userSpaceOnUse"><circle cx="12" cy="12" r="0.8" fill="#c7d0cb" opacity="0.45"/></pattern>
+ <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 Z" fill="#6f7b81"/></marker>
+ <marker id="arrowAccent" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 Z" fill="#bc512f"/></marker>
+</defs>
+<rect width="1440" height="700" fill="#f6f6f2"/>
+<rect width="1440" height="700" fill="url(#dots)"/>
+<text x="72" y="75" fill="#bc512f" font-size="16" letter-spacing="3" font-family="Arial,Helvetica,sans-serif" font-weight="bold">HERMES / WORKFLOW ARCHITECTURE</text>
+<text x="72" y="135" fill="#252d36" font-size="43" font-family="Georgia,serif">One team. Six processes. Continuous learning.</text>
+<text x="72" y="170" fill="#6f7b81" font-size="19">Six logical AI roles, one deterministic controller — humans retain approval authority</text>
+<line x1="72" y1="193" x2="1368" y2="193" stroke="#cfd5d1" stroke-width="1"/>
+<!-- Edges appear behind opaque cards. -->
+<g fill="none" stroke="#6f7b81" stroke-width="2" marker-end="url(#arrow)">
+ <line x1="266" y1="312" x2="298" y2="312"/>
+ <line x1="484" y1="312" x2="516" y2="312"/>
+ <line x1="702" y1="312" x2="734" y2="312"/>
+ <line x1="920" y1="312" x2="952" y2="312"/>
+ <line x1="1138" y1="312" x2="1170" y2="312"/>
+</g>
+<!-- Feedback loop: Maintain -> Plan. Orthogonal bends, no box crossings. -->
+<path d="M1262 397 V464 Q1262 478 1248 478 H188 Q174 478 174 464 V402" stroke="#bc512f" stroke-width="2.5" fill="none" marker-end="url(#arrowAccent)"/>
+<rect x="563" y="463" width="318" height="30" fill="#f6f6f2"/>
+<text x="722" y="484" fill="#bc512f" text-anchor="middle" font-size="15" font-weight="bold" letter-spacing="1.1">FEEDBACK / INCIDENT / NEXT INTENT</text>
+<!-- Step cards: 6, no self-approval implied. -->
+<g font-family="Arial,Helvetica,sans-serif">
+ <g><rect x="72" y="237" width="194" height="165" rx="7" fill="#ffffff" stroke="#bc512f" stroke-width="2"/><rect x="86" y="253" width="36" height="26" rx="3" fill="#f7e6df"/><text x="104" y="272" text-anchor="middle" font-size="14" fill="#bc512f" font-weight="bold">01</text><text x="88" y="308" font-size="23" fill="#252d36" font-weight="bold">PLAN</text><text x="88" y="337" font-size="17" fill="#4c5b60">PM / BA</text><line x1="88" y1="350" x2="249" y2="350" stroke="#cfd5d1"/><text x="88" y="376" fill="#6f7b81" font-size="15">intent.md · AC</text></g>
+ <g><rect x="290" y="237" width="194" height="165" rx="7" fill="#ffffff" stroke="#cfd5d1"/><rect x="304" y="253" width="36" height="26" rx="3" fill="#ebeeee"/><text x="322" y="272" text-anchor="middle" font-size="14" fill="#4c5b60" font-weight="bold">02</text><text x="306" y="308" font-size="23" fill="#252d36" font-weight="bold">DESIGN</text><text x="306" y="337" font-size="17" fill="#4c5b60">Solution Architect</text><line x1="306" y1="350" x2="467" y2="350" stroke="#cfd5d1"/><text x="306" y="376" fill="#6f7b81" font-size="15">spec.md · ADR</text></g>
+ <g><rect x="508" y="237" width="194" height="165" rx="7" fill="#ffffff" stroke="#cfd5d1"/><rect x="522" y="253" width="36" height="26" rx="3" fill="#ebeeee"/><text x="540" y="272" text-anchor="middle" font-size="14" fill="#4c5b60" font-weight="bold">03</text><text x="524" y="308" font-size="23" fill="#252d36" font-weight="bold">BUILD</text><text x="524" y="337" font-size="17" fill="#4c5b60">Developer</text><line x1="524" y1="350" x2="685" y2="350" stroke="#cfd5d1"/><text x="524" y="376" fill="#6f7b81" font-size="15">plan.md · code / PR</text></g>
+ <g><rect x="726" y="237" width="194" height="165" rx="7" fill="#ffffff" stroke="#cfd5d1"/><rect x="740" y="253" width="36" height="26" rx="3" fill="#ebeeee"/><text x="758" y="272" text-anchor="middle" font-size="14" fill="#4c5b60" font-weight="bold">04</text><text x="742" y="308" font-size="23" fill="#252d36" font-weight="bold">TEST</text><text x="742" y="337" font-size="17" fill="#4c5b60">QA / Tester</text><line x1="742" y1="350" x2="903" y2="350" stroke="#cfd5d1"/><text x="742" y="376" fill="#6f7b81" font-size="15">test-report.md</text></g>
+ <g><rect x="944" y="237" width="194" height="165" rx="7" fill="#ffffff" stroke="#bc512f" stroke-width="2"/><rect x="958" y="253" width="36" height="26" rx="3" fill="#f7e6df"/><text x="976" y="272" text-anchor="middle" font-size="14" fill="#bc512f" font-weight="bold">05</text><text x="960" y="308" font-size="23" fill="#252d36" font-weight="bold">DEPLOY</text><text x="960" y="332" font-size="15" fill="#4c5b60">Reviewer + DevOps</text><text x="960" y="351" font-size="15" fill="#4c5b60">/ SRE</text><line x1="960" y1="359" x2="1121" y2="359" stroke="#cfd5d1"/><text x="960" y="384" fill="#6f7b81" font-size="14">review + release</text></g>
+ <g><rect x="1162" y="237" width="194" height="165" rx="7" fill="#ffffff" stroke="#cfd5d1"/><rect x="1176" y="253" width="36" height="26" rx="3" fill="#ebeeee"/><text x="1194" y="272" text-anchor="middle" font-size="14" fill="#4c5b60" font-weight="bold">06</text><text x="1178" y="308" font-size="23" fill="#252d36" font-weight="bold">MAINTAIN</text><text x="1178" y="337" font-size="17" fill="#4c5b60">DevOps / SRE</text><line x1="1178" y1="350" x2="1339" y2="350" stroke="#cfd5d1"/><text x="1178" y="376" fill="#6f7b81" font-size="15">incident · lessons</text></g>
+</g>
+<line x1="72" y1="538" x2="1368" y2="538" stroke="#cfd5d1"/>
+<text x="72" y="573" font-size="15" font-weight="bold" letter-spacing="1.5" fill="#bc512f">HUMAN GATES</text>
+<text x="72" y="604" font-size="17" fill="#252d36">Owner accepts scope</text>
+<text x="501" y="604" font-size="17" fill="#252d36">QA and independent Reviewer inspect evidence</text>
+<text x="1100" y="604" font-size="17" fill="#252d36">Human authorizes release</text>
+<text x="72" y="655" font-size="14" fill="#6f7b81">Architecture reference: docs/08-six-stage-role-target.md · Diagram is illustrative, not approval/test evidence.</text>
+<text x="1368" y="655" font-size="14" fill="#6f7b81" text-anchor="end">OFFLINE · HTML + SVG</text>
+</svg>
+<p class="note">Source of truth: <code>docs/08-six-stage-role-target.md</code>. In the two-day MVP, “Deploy” means review, PR, and DEV/demo release preparation only; production is not autonomous. This diagram is a reviewed visual aid, not a running Hermes plugin or proof of implementation.</p>
+</main>
+</body>
+</html>
