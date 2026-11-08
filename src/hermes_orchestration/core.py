@@ -152,6 +152,13 @@ class LocalStore:
         artifact = state["artifacts"].get(stage)
         if not artifact or artifact["mode"] != "live":
             raise WorkflowError("Mock output cannot advance workflow")
+        if stage == "BUILD" and not artifact.get("evidence", {}).get("commit_sha"):
+            raise WorkflowError("BUILD requires actual code commit evidence")
+        if stage == "TEST" and artifact.get("evidence", {}).get("test_passed") is not True:
+            raise WorkflowError("QA tests failed or are missing")
+        if stage == "DEPLOY":
+            if not artifact.get("evidence", {}).get("review_sha256") or not artifact.get("evidence", {}).get("pr_url"):
+                raise WorkflowError("Independent review and PR required before deploy readiness")
         if stage in HUMAN_APPROVAL:
             decisions = [x for x in state["approvals"] if x["stage"] == stage and x["artifact_sha256"] == artifact["sha256"]]
             if not decisions or decisions[-1]["decision"] != "accept":
