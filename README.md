@@ -27,6 +27,19 @@ flowchart LR
 
 **Key rule:** the AI Independent Reviewer generates risk/quality findings, **not a binding human approval**. Owner, named code owner, policy owner and release manager remain accountable for their designated approval gates. Tests, policies and CI are mandatory external checks, not self-assertions by an agent.
 
+## Logical architecture — execution is not learning
+
+[15 — Four logical component contracts](docs/15-logical-boundary-architecture.md) separates:
+
+| Component | Responsibility |
+|---|---|
+| **WorkflowController** | SDLC stage decisions, role routing, approval/budget policy |
+| **DurableExecution** | Task state, checkpoints, idempotent retries, event and evidence refs |
+| **AgentMemory** | Approved personal/project memory and candidate lessons |
+| **SkillManager** | Approved `SKILL.md` procedures, stage/role selection, version promotion |
+
+**AgentWorker** executes a task using pinned profile, memory and skill versions. Durable task history never automatically becomes AgentMemory. These are **four logical responsibilities, not four deployable services**. MVP stays local/partial; Full implements F1 durable recovery and F4 governed learning. Current implementation PRs #10 and #11 are unaffected.
+
 ## Two implementation phases
 
 | | Phase 1 — **MVP (hard 2 working days / 16 engineer-hours)** | Phase 2 — **FULL (complete target design)** |
