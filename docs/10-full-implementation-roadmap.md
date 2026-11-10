@@ -6,6 +6,12 @@
 
 Use [11 — selective vtno/skills integration](11-vtno-skills-adoption.md) as the procedure layer for existing roles, not as a new platform. F0 freezes reviewed skill schema/provenance; F2 adds two-axis Standards/Spec review and bounded author–review loops; F3 enforces tool allowlists, source/license verification, immutability and approval outside Skills; F4 adds regression evals, skill promotion/rollback and measured selection quality. Reviewer findings remain advisory until deterministic gates and named human code-owner controls take effect. Keep all upstream skill/script fetches out of production task execution.
 
+## Decision: separate durable execution from learned knowledge
+
+[15 — logical component architecture](15-logical-boundary-architecture.md) is the authoritative boundary map. **WorkflowController** decides workflow and policy; **DurableExecution** retains task/attempt state, checkpoints and evidence; **AgentMemory** retains approved role/project knowledge; **SkillManager** resolves approved procedures and promotes versions only after review. AgentWorkers remain disposable. These are *logical* boundaries; DynamoDB/S3/Git can be shared with scoped data ownership, permissions and retention.
+
+**Release plan:** F0 freezes contracts; **F1** implements crash-safe DurableExecution; **F2** consumes pinned memory/skill snapshots while executing six stages; **F3** provides authenticated approval and isolation; **F4** adds controlled AgentMemory/SkillManager learning, evaluation, promotion and rollback. Running tasks never receive a silently changed knowledge/skill version. No change to 2-day MVP or six AI roles.
+
 ## Full end state
 
 - One Human Founder/Product Owner controls goal, prioritization, budget, exceptions and final production decisions.

@@ -31,6 +31,10 @@ flowchart TD
 
 The five skills studied in [11 — selective vtno/skills adoption](11-vtno-skills-adoption.md) strengthen **how** existing roles execute tasks, without adding new AI roles or changing the six-stage controller. The adaptation prioritizes one bounded implementation PR, independent two-axis review (**Standards** and **Spec**), caller-defined interfaces and reproducible tests. The task envelope may include `skill_id` and `skill_version` or a Git SHA for evidence; those fields are **not** permissions. The controller, role tool policy, QA evidence and named human approval retain authority. Do not install upstream skills into workers automatically or execute downloaded scripts.
 
+## Four logical boundaries under one orchestrator
+
+Refer to [15 — four logical components and their contracts](15-logical-boundary-architecture.md). Keep **WorkflowController** (policy/SDLC decisions), **DurableExecution** (attempt state/recovery/evidence), **AgentMemory** (approved role/project knowledge), and **SkillManager** (approved reusable procedures) separate as *interfaces*, even if they run in one process and share AWS S3/DynamoDB infrastructure. `AgentWorker` executes bounded tasks using pinned profile, memory, and skill versions. **Execution logs are evidence, not automatically promoted learning.** No new AI roles or mandatory services are added.
+
 ## Role contracts
 
 | Role ID | Mission / accountable deliverable | Inputs | Outputs | Hard boundaries |

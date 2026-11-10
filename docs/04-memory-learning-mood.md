@@ -2,6 +2,17 @@
 
 ## Principle
 
+## Four logical components (2026-11-10)
+
+**New authoritative separation:** [15 — Durable execution, agent memory and skills](15-logical-boundary-architecture.md). Hermes uses **WorkflowController**, **DurableExecution**, **AgentMemory**, and **SkillManager** as distinct *logical components*. **AgentWorker** consumes approved profile/memory/skill versions and produces execution evidence. These are **not separate microservices by default**.
+
+- **DurableExecution** owns task/attempt state, idempotency, checkpoint/restart and evidence pointers. A completed task is **not** automatically a learned fact.
+- **AgentMemory** owns approved role/project-scoped knowledge, candidate lessons and snapshot history.
+- **SkillManager** owns reviewed procedures and versioned promotion/rollback; a `SKILL.md` is not a permission grant.
+- **WorkflowController** alone evaluates transition and promotion policy, with named human/external approval where required.
+
+A newly approved memory or skill is loaded by the **next task**, not silently injected into an existing retry. Full F1 implements durable execution; F4 implements governed continuous learning. The two-day local MVP remains unchanged.
+
 **One role = one identity, not one always-on server.** Fargate tasks are replaceable. An agent's identity, history and approved skills survive via versioned stores. Mood is **a calculated operational presentation**, not genuine feelings or model consciousness.
 
 ## Memory and learning by source of truth

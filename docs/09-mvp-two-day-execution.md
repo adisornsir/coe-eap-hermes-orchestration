@@ -14,6 +14,10 @@ Choose a tiny demo change (example: a read-only status/health endpoint with inpu
 
 [11 — vtno/skills adoption](11-vtno-skills-adoption.md) refines existing P0 tasks; it **does not add hours**. In D1.2, write two small **original, reviewed** SKILL.md-style procedures (`implementation-step` and `two-axis-review`) and load them explicitly by role/stage. If a generic loader is too costly, use pinned local instructions and record the version; do not defer core controller tests. In D2.1, Developer handles **one planned step / one PR**. In D2.2, Reviewer reports **Standards** and **Spec** separately against a pinned base diff while QA independently tests the accepted criteria. Limit the demo to **initial review + one re-review**; if required findings persist, record `BLOCKED` and human escalation rather than looping indefinitely. Keep at least one real test run and negative-gate test; repeated three-pass full-suite runs and parallel sub-review agents are Full enhancements. No runtime download, upstream installer or imported script execution in MVP. Licensing and source review precede any future copying.
 
+## Storage boundaries for the 16-hour MVP
+
+Follow [15 — four logical component contracts](15-logical-boundary-architecture.md), but **do not expand the two-day implementation**. The current `LocalStore` records workflow and execution artifacts; it is a local DurableExecution *approximation*, not enterprise durability. Keep proposed lessons separate from `state.json`, and never auto-load or promote those lessons. The current `skills.py` is a fixed first-party SkillManager *adapter*, not a full registry. `AgentMemory` remains a Full feature. No queues, ECS, DynamoDB, external Memory API or new microservice in this MVP.
+
 ## Scope lock: IN versus OUT
 
 | Priority | IN: must have to claim complete | OUT: Full phase |
