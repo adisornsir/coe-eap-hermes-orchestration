@@ -20,6 +20,10 @@ Choose a tiny demo change (example: a read-only status/health endpoint with inpu
 
 Follow [15 — four logical component contracts](15-logical-boundary-architecture.md), but **do not expand the two-day implementation**. The current `LocalStore` records workflow and execution artifacts; it is a local DurableExecution *approximation*, not enterprise durability. Keep proposed lessons separate from `state.json`, and never auto-load or promote those lessons. The current `skills.py` is a fixed first-party SkillManager *adapter*, not a full registry. `AgentMemory` remains a Full feature. No queues, ECS, DynamoDB, external Memory API or new microservice in this MVP.
 
+## Plane and Telegram integration is NOT a new 2-day P0
+
+[17 — Plane/Telegram integration](17-plane-telegram-integration.md) is an **approved target** with a Full rollout. The 16-hour vertical slice still prioritizes a real Hermes Kanban + LiteLLM + GitHub flow with six role contracts, QA/Reviewer and human approvals. **Telegram read-only notification/status or a manually linked Plane item is P1**, only if the required API/bot credentials and identity checks are already available. Do not construct an unsecured Telegram approval or Plane webhook receiver to claim MVP completion. Failed/unavailable integrations are explicitly PARTIAL/BLOCKED.
+
 ## Hermes-native delivery board — revised 2-day target
 
 | Window | Native-first activity | Check |
@@ -46,7 +50,7 @@ Follow [15 — four logical component contracts](15-logical-boundary-architectur
 | P0 | Build/test on local sandbox repo; independent QA and Reviewer evidence | Enterprise security test suite and continuous evals |
 | P0 | Git branch + PR (human-reviewed); manually recorded Owner approval | Production deployment, automated production rollback |
 | P0 | Minimal tool permissions, secret exclusion, task timeout, spend/checkpoint logging | Full managed IAM/network/branch policies across every environment |
-| P1 only if time | OpenProject link using existing API, simple status/usage summary | Full bidirectional OpenProject sync, service dashboard |
+| P1 only if time | Plane link using existing API, simple status/usage summary | Full bidirectional Plane sync, service dashboard |
 | P1 only if time | Human-authored `lessons.md` with next-intent feedback | Persistent automatic skill learning, simulated mood, incident agents |
 
 **Cut rule:** when time slips, cut all P1 and UI work, then reduce demo feature complexity. **Never cut tests, reviewer independence, approval/secret guardrails or audit linkage** to claim a successful P0 demo.

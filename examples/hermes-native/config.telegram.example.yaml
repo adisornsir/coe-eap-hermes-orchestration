@@ -1,0 +1,25 @@
+# Pilot-only Hermes native Gateway Telegram overlay (NOT TESTED/DEPLOYED).
+# Merge into the Telegram INGRESS profile's ~/.hermes/config.yaml,
+# together with examples/hermes-native/config.kanban.example.yaml.
+# Pin Hermes version, inspect docs and validate real config before rollout.
+# Do NOT put a bot token in this YAML or in Git.
+#
+# In the ingress profile's protected .env, provision at runtime from a
+# secure store:
+#   TELEGRAM_BOT_TOKEN = from @BotFather via approved secret store
+#   TELEGRAM_ALLOWED_USERS = comma-separated numeric Telegram user IDs
+#
+# Do NOT set TELEGRAM_ALLOW_ALL_USERS=true.
+# Do NOT copy the same token into pm-ba/sa/dev/qa/reviewer/devops-sre.
+# The default transport is outbound long polling; no public webhook needed.
+gateway:
+  multiplex_profiles: true
+
+telegram:
+  require_mention: true
+  exclusive_bot_mentions: true
+  mention_patterns: []
+
+# This is a chat transport, not a permission grant.
+# Trusted human approval, Plane API calls and protected GitHub merge
+# remain enforced by the separate Plane–Hermes Bridge/policy adapter.
