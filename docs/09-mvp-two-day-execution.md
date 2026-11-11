@@ -1,5 +1,7 @@
 # 09 — Two-day MVP implementation plan (hard timebox)
 
+> **Hermes-native replan 2026-11-11:** [16 deployment decision](16-hermes-native-deployment.md) replaces the earlier custom Python dispatch-first MVP with **one local Hermes gateway/Kanban + six profiles + minimal external policy checker**. Existing PR #10/#11 are scaffold/contract tests and require a fit-gap review. Below, revised Day 1/2 board takes precedence over earlier notes where they conflict.
+
 > **Phase: MVP / 2 working days / 16 engineer-hours maximum**. Planned scope, **not yet built**. Assumption: one experienced engineer, access to this repo and a sandbox/demo repository, working LiteLLM credentials/model aliases, local Docker/Python or equivalent, and permission to create GitHub PRs. If prerequisites are missing, stop/mark blocked; **do not claim completion through mocked output**.
 
 ## Measurable outcome
@@ -18,14 +20,29 @@ Choose a tiny demo change (example: a read-only status/health endpoint with inpu
 
 Follow [15 — four logical component contracts](15-logical-boundary-architecture.md), but **do not expand the two-day implementation**. The current `LocalStore` records workflow and execution artifacts; it is a local DurableExecution *approximation*, not enterprise durability. Keep proposed lessons separate from `state.json`, and never auto-load or promote those lessons. The current `skills.py` is a fixed first-party SkillManager *adapter*, not a full registry. `AgentMemory` remains a Full feature. No queues, ECS, DynamoDB, external Memory API or new microservice in this MVP.
 
+## Hermes-native delivery board — revised 2-day target
+
+| Window | Native-first activity | Check |
+|---|---|---|
+| Day 1 / 0–2h | Pin Hermes version; check Kanban CLI, gateway, LiteLLM, GitHub and approved sandbox | Versioned `preflight.md` |
+| Day 1 / 2–4h | Create six Hermes profiles/roles, approved local Skills and bounded tools | Profile/Skill provenance |
+| Day 1 / 4–6h | Enable one local gateway-owned dispatcher and single board, manual decomposition, review as explicit role | Actual Kanban cards + dependency and restart evidence |
+| Day 1 / 6–8h | Add minimal SDLC human/CI/QA gate checker, run Plan + Design | Real `intent.md`/`spec.md` and recorded Owner decisions |
+| Day 2 / 0–3h | Developer BUILD card creates real branch/tests/PR | Commit and GitHub URL verified externally |
+| Day 2 / 3–5h | Independent QA and Reviewer cards check actual tests/diff/spec | QA and Standards/Spec reports |
+| Day 2 / 5–7h | DevOps/SRE prepares DEV release only; Owner/Code Owner gate; no production | Verifiable release-prep evidence |
+| Day 2 / 7–8h | Maintenance feedback, failed-gate tests, gateway restart and final evidence index | Linked six-stage trace, PASS/PARTIAL status |
+
+**Cut rule:** reduce demo story and optional integrations, **not** external approval, real test evidence or independent Reviewer. Do not claim a working Hermes board based only on the existing Python unittest CI. If the required Hermes version or credentials are unavailable within the timebox, mark PARTIAL; do not recreate a large custom scheduler.
+
 ## Scope lock: IN versus OUT
 
 | Priority | IN: must have to claim complete | OUT: Full phase |
 |---|---|---|
 | P0 | Six role instruction/profile definitions using one reusable runtime | Six always-on agents, agent social interactions, multi-agent swarm |
-| P0 | Six-stage deterministic state machine with fail/rework path | Distributed orchestration, auto-scaling scheduler |
+| P0 | Native Hermes Kanban task graph + a deterministic external SDLC acceptance/approval adapter | Custom distributed task dispatcher, autoscaling scheduler |
 | P0 | Typed task/result JSON and `intent/spec/plan/test/review/release/incident` artifact chain | DynamoDB + S3 durable distributed state/snapshots |
-| P0 | Real invocation through a pinned Hermes/local CLI adapter to available LiteLLM, or explicit BLOCKED record if incompatible | Production ECS Fargate gateway and worker provisioning |
+| P0 | Real Hermes Kanban/profile worker invocation via approved LiteLLM, or explicit BLOCKED evidence | Production-scale multi-host deployment |
 | P0 | Build/test on local sandbox repo; independent QA and Reviewer evidence | Enterprise security test suite and continuous evals |
 | P0 | Git branch + PR (human-reviewed); manually recorded Owner approval | Production deployment, automated production rollback |
 | P0 | Minimal tool permissions, secret exclusion, task timeout, spend/checkpoint logging | Full managed IAM/network/branch policies across every environment |
@@ -73,7 +90,7 @@ tests/                     # transition, gates, reviewer isolation, retries
 docs/demo-runbook.md
 ```
 
-Keep integration adapters small. The existing AWS planned deployment (gateway, Fargate, DynamoDB, S3) is retained for Full phase. Do **not** deploy permanent paid infrastructure for the timeboxed MVP unless it is already provisioned and verified.
+Keep integration adapters small. The current AWS operational direction is one EC2/EBS Hermes host with gateway-owned Kanban; optional multi-host shard later (see [16](16-hermes-native-deployment.md)). Do **not** deploy permanent paid infrastructure for the timeboxed MVP unless it is already provisioned and verified.
 
 ## Definition of Done (binary: checked only with evidence)
 
@@ -98,7 +115,7 @@ Keep integration adapters small. The existing AWS planned deployment (gateway, F
 2. **Git access:** if installation lacks GitHub write permission, generate a patch and evidence file and classify the PR gate blocked; do not fake a PR.
 3. **Owner unavailability:** stage can remain `WAITING_APPROVAL`. Do not auto-approve for demo.
 4. **PR quality:** sample feature is deliberately small; retain QA/reviewer boundaries. Defer full security scans, IaC deployment and complex test types.
-5. **Budget:** cap model calls, concurrency = 1, avoid always-on gateway for two-day trial; log token/model cost and note limits are not guaranteed cloud billing hard caps.
+5. **Budget:** cap model calls and set `kanban.max_in_progress: 1` for the two-day demo; a short-lived local gateway is necessary to exercise gateway-embedded dispatch. Do not provision permanent AWS for the timebox; log tokens/cost and verify actual model limits.
 6. **Data:** synthetic demo data only. Explicitly prohibit customer/production secrets.
 
 ## Handoff to Full

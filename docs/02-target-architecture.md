@@ -1,3 +1,5 @@
+> **SUPERSEDED AWS WORKER REFERENCE:** [16 — Hermes-native single-host target](16-hermes-native-deployment.md) now supersedes this Fargate-first topology. This page is kept as a historical option, not the implementation default. Do **not** share live Kanban SQLite over EFS or multiple ECS replicas; stage/approval policy remains separate from Hermes. Earlier text suggesting automatic memory promotion after QA is also superseded: only independently evaluated and approved candidates may promote (see [15](15-logical-boundary-architecture.md)).
+
 > **DESIGN HISTORY / RUNTIME REFERENCE — 2026-11-05:** The AWS component choices and isolation guidance below remain a reference for **FULL**. However, the five-role and combined PM/Gateway agent descriptions are superseded by [six-role target](08-six-stage-role-target.md); MVP runtime is now the [two-day local/sandbox slice](09-mvp-two-day-execution.md). Do not treat the older diagram as the two-day delivery commitment.
 
 ---

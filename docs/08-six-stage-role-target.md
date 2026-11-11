@@ -20,7 +20,7 @@ flowchart TD
  C -. "on-demand bounded task" .-> SP["Specialists: security, UX, DB, cloud, performance"]
  C <--> W[("Work item + artifacts + history")]
  C --> LM["LiteLLM model routing and spend"]
- C --> RUN["Worker runner: local in MVP / ECS Fargate in Full"]
+ C --> RUN["Worker runner: local in MVP / Hermes Kanban on single host"]
  RUN --> GH["GitHub branches, PRs, CI"]
  W --> OP["OpenProject business work items"]
  SRE --> OBS["Monitoring + incident source"]
@@ -34,6 +34,10 @@ The five skills studied in [11 — selective vtno/skills adoption](11-vtno-skill
 ## Four logical boundaries under one orchestrator
 
 Refer to [15 — four logical components and their contracts](15-logical-boundary-architecture.md). Keep **WorkflowController** (policy/SDLC decisions), **DurableExecution** (attempt state/recovery/evidence), **AgentMemory** (approved role/project knowledge), and **SkillManager** (approved reusable procedures) separate as *interfaces*, even if they run in one process and share AWS S3/DynamoDB infrastructure. `AgentWorker` executes bounded tasks using pinned profile, memory, and skill versions. **Execution logs are evidence, not automatically promoted learning.** No new AI roles or mandatory services are added.
+
+## Hermes-native coordination decision
+
+**Current deployment design:** [16 — Hermes-native Gateway/Kanban, profiles and scaling](16-hermes-native-deployment.md). Hermes native **Kanban** is responsible for its **single-host** task board, dependencies, role dispatch, retry and profile lifecycle. The **Thin SDLC Policy Adapter** owns trusted acceptance decisions, external human approval and CI/QA/PR evidence, and only then authorizes downstream cards. It does not implement a duplicate task scheduler. The existing four logical concerns stay separate, but their implementation may be inside one host and shared stores. **A Kanban done/review state is never equal to approval.**
 
 ## Role contracts
 
@@ -121,8 +125,8 @@ Hard controls: scoped IAM and GitHub credentials, protected branches, per-role t
 
 ## Deployment split: same design, two implementation depths
 
-- **MVP (two days):** same 6 stage names and 6 logical role definitions, local/single-host deterministic controller, sequential role invocations, file/JSON artifacts, LiteLLM where credentials exist, sandbox repo + tests + PR, manually recorded approvals, DEV/demo only. No production execution.
-- **Full:** keep contracts and role IDs; move execution to the existing preferred Gateway/ECS Fargate + DynamoDB locks/events + S3 versioned artifacts/role snapshots; integrate OpenProject, policy checks, evals, reviewer, CI/CD, telemetry, incident-triggered loop and controlled continuous learning. No requirement to add heavy infra until proven by demand.
+- **MVP (two days):** six role profiles, native local Hermes Kanban and single gateway where pinned Hermes is available, deterministic external SDLC acceptance checks, real LiteLLM/PR evidence, explicit manual approvals and DEV/demo only. Existing Python LocalStore scaffold is retained for contract tests but is NOT the preferred production dispatcher. If a real Hermes integration fails, report PARTIAL.
+- **Full:** begin with one private EC2/EBS Hermes host, native gateway-owned Kanban and profile workers; external policy checks, GitHub/OpenProject/LiteLLM and evidence backup. Scale vertically, then use independent Hermes hosts for separate workloads; DynamoDB/SQS/ECS are optional later for measured cross-host needs, not the default.
 
 ## Memory, learning, behavior and metrics
 

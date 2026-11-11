@@ -1,0 +1,23 @@
+# Hermes-native PILOT example only — merge into ~/.hermes/config.yaml
+# Tested against docs, NOT against the organization's pinned Hermes binary.
+# Do not place API keys, tokens, approved project identifiers or passwords here.
+# One Hermes gateway owner and one Kanban dispatcher per local board.
+gateway:
+  multiplex_profiles: true
+
+kanban:
+  dispatch_in_gateway: true
+  dispatch_interval_seconds: 60
+  auto_decompose: false
+  # REVIEW happens as an explicit reviewer-profile card in our SDLC graph.
+  review_dispatch: false
+  # Conservative pilot limits; not Hermes built-in defaults.
+  max_in_progress: 2
+  max_in_progress_per_profile: 1
+  failure_limit: 2
+
+# Configure six isolated Hermes profiles separately:
+# pm-ba, sa, dev, qa, reviewer, devops-sre
+# Use Hermes-native per-profile settings and approved LiteLLM credentials.
+# Prefer a private systemd gateway on EC2+EBS; profile is NOT a security sandbox.
+# Never run a second standalone kanban daemon against the same board.

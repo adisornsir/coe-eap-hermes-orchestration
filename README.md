@@ -2,7 +2,7 @@
 
 > **STATUS: Architecture and implementation plans only — NOT deployed or implemented.**  
 > **Design baseline: 2026-11-05.** **Owner:** Human Founder / Product Owner.  
-> **Target:** Portable, evidence-driven AI software team; local/sandbox 2-day MVP, then AWS ECS Fargate Full architecture.
+> **Target:** Hermes-native Kanban + six profiles + thin SDLC governance; local 2-day MVP, then AWS single-host EC2/EBS with optional project sharding.
 
 ## Decision
 
@@ -40,12 +40,18 @@ flowchart LR
 
 **AgentWorker** executes a task using pinned profile, memory and skill versions. Durable task history never automatically becomes AgentMemory. These are **four logical responsibilities, not four deployable services**. MVP stays local/partial; Full implements F1 durable recovery and F4 governed learning. Current implementation PRs #10 and #11 are unaffected.
 
+## Deployment default: Hermes-native Kanban
+
+[16 — Hermes-native Kanban deployment and scaling](docs/16-hermes-native-deployment.md) is the **current runtime/deployment decision**. One Hermes Gateway with an embedded Kanban dispatcher, six profiles, local SQLite on EBS, GitHub/OpenProject/LiteLLM and an external policy/approval adapter. Scale vertically first; use **independent hosts per project** rather than sharing Kanban SQLite. The four logical responsibilities in [15](docs/15-logical-boundary-architecture.md) remain conceptual and need not become microservices.
+
+**Implementation note:** PR #10/#11 contain an earlier local Python controller scaffold and have NOT demonstrated Hermes Kanban or end-to-end integrations. Review/repurpose them; do not launch two independent task dispatchers.
+
 ## Two implementation phases
 
 | | Phase 1 — **MVP (hard 2 working days / 16 engineer-hours)** | Phase 2 — **FULL (complete target design)** |
 |---|---|---|
 | Goal | One bounded, traceable 6-stage demo feature with a real PR/test run | Secure, durable AI-operated SDLC, including closed-loop maintenance |
-| Runtime | Local/sandbox single-process sequential controller, reusable role profiles | Hermes Gateway + Fargate worker RunTask, DynamoDB locks/idempotency, S3 artifacts |
+| Runtime | Local Hermes Gateway + Kanban board + six profiles, thin policy checker (requires smoke tests) | One private EC2 + EBS Hermes host; optional separate project hosts on demand |
 | Roles | 6 logical role profiles; one worker implementation; on-demand specialists not required | 6 isolated roles, specialists and governed concurrency |
 | Workflow | Markdown/JSON artifact handoffs, manual human gates, QA and independent review | OpenProject integration, stage gates, CI/evals, incident-triggered loops, telemetry |
 | Memory | Static instructions, bounded run history, proposed lessons only | Versioned per-role/project snapshots, approved skill promotion, simulations of mood based on measured outcomes |
@@ -66,9 +72,10 @@ flowchart LR
 
 ## Read first — authoritative plans
 
-1. [08 — Six-stage target workflow and role contracts](docs/08-six-stage-role-target.md)
-2. [09 — Two-day MVP hour-by-hour execution plan and Definition of Done](docs/09-mvp-two-day-execution.md)
-3. [10 — Full implementation roadmap, waves F0–F5 and acceptance](docs/10-full-implementation-roadmap.md)
+1. [16 — Hermes-native deployment and scaling](docs/16-hermes-native-deployment.md)
+2. [08 — Six-stage target workflow and role contracts](docs/08-six-stage-role-target.md)
+3. [09 — Two-day MVP hour-by-hour execution plan and Definition of Done](docs/09-mvp-two-day-execution.md)
+4. [10 — Full implementation roadmap, waves F0–F5 and acceptance](docs/10-full-implementation-roadmap.md)
 
 ## Original reference designs (retained as detailed background)
 

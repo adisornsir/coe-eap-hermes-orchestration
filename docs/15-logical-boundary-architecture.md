@@ -110,15 +110,27 @@ The literal values are an **illustrative schema**, not real stored data. For a n
 
 This keeps **execution recovery** separate from **agent development**. Checkpoint resumption should restore the previous task's versioned context, not accidentally load fresh unapproved memory.
 
+## Hermes-native implementation mapping (supersedes Fargate-first examples below)
+
+[16 — Hermes-native deployment architecture](16-hermes-native-deployment.md) maps these four logical concerns to **one host**:
+
+- `WorkflowController` becomes a **thin policy/approval gate adapter**; Hermes Kanban handles dispatch/dependencies, not a custom second scheduler.
+- `DurableExecution` starts as **Hermes native Kanban SQLite on EBS**, plus external evidence refs and application-consistent backup/recovery. Native crash recovery is not globally exactly-once for GitHub/CI side-effects.
+- `AgentMemory` starts with Hermes per-profile memory plus **separate approved project/role snapshots**; candidates do not automatically become approved memory.
+- `SkillManager` resolves vetted Hermes Skills; source/version + eval/approval control remain outside `SKILL.md`.
+- `AgentWorker` is a Hermes local managed profile process. **No ECS RunTask per worker in the first deployment.**
+
+This is a **mapping of logical contracts**, not a change to six SDLC stages, not four microservices and not a claim of live deployment. Full F1 starts EC2/EBS native recovery; F4 adds governed learning/promotion.
+
 ## MVP versus Full: non-inflating scope
 
 | Area | MVP Day 1/2 (existing PR #10/#11) | Full plan |
 |---|---|---|
 | WorkflowController | Existing local deterministic \`core.py\`, manual approval record, one task at a time | Authenticated external gates, robust policy checks |
-| DurableExecution | Same \`LocalStore\` JSON/Markdown; best-effort local restart state | F1: DynamoDB conditional state/leases/idempotency, S3 evidence, ECS worker recovery |
+| DurableExecution | Native Kanban SQLite after Hermes preflight; existing LocalStore retained only as scaffold/contract tests | F1: EC2/EBS gateway-owned Kanban, consistent backup/restore, external side-effect reconciliation |
 | AgentMemory | **No autonomous persistent learning**; optional human-reviewed \`lessons.md\`, kept separate from \`state.json\` | F4: per-role/project versioned snapshots, approved promotion, rollback |
 | SkillManager | Reviewed local \`skills/*.md\` and explicit \`skills.py\` allowlist/provenance in PR #10 | F4: registry, eval, secure promotion/revocation and version reconciliation |
-| AgentWorker | Existing PLAN/DESIGN LiteLLM adapter + partial Day 2 scaffold | F1/F2: real isolated Hermes workers across six stages |
+| AgentWorker | Require Hermes Kanban profile-worker real run; existing Python adapter remains partial scaffold | F1/F2: native Hermes per-profile workers and bounded concurrency on one host |
 | Multi-service infrastructure | None | Deploy components together initially; split only on measured operational need |
 
 **MVP code status:** PR #10 and stacked PR #11 are not merged; their local \`LocalStore\` and Skill Loader are **partial implementations**, not an AgentMemory service or authenticated enterprise runtime. Do not add Fargate, queues, network APIs, a vector database or automatic skill learning to the 16-hour MVP.
@@ -126,7 +138,7 @@ This keeps **execution recovery** separate from **agent development**. Checkpoin
 ## Full sequencing and gates
 
 - **F0:** Freeze stable contracts and distinct names; add tests ensuring task history cannot become approved memory/skill without a promotion decision.
-- **F1:** Deliver DurableExecution (DynamoDB/S3/ECS) with tasks surviving controller restart, exactly-once *state transitions* via conditional writes and **effectively-once** external side-effects via idempotency/reconciliation. Do **not** promise mathematically exactly-once execution across GitHub/CI/model APIs.
+- **F1:** Deploy native Hermes Gateway+Kanban on EC2/EBS; test consistent SQLite backup/restore, gateway restart and bounded retry; reconcile external GitHub/CI effects with stable IDs. Do **not** promise exactly-once execution or cross-host Kanban support. DynamoDB/S3/ECS may be introduced later only for proven need.
 - **F2:** Add complete role execution and actual GitHub/OpenProject references, QA and Reviewer handoffs with read-only memory retrieval and pinned skill versions.
 - **F3:** Secure source access, authenticated approval, role/project permissions, restricted promotion credentials, retention, audit and negative security tests. Mandatory control gates precede any production-impact feature.
 - **F4:** AgentMemory and SkillManager governed learning: candidate → eval → human authorization → versioned promotion → rollback; measure quality, cost and simulated mood without changing privileges.
