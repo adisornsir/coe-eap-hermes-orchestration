@@ -23,7 +23,7 @@ flowchart TD
  K --> L["LiteLLM model routing and spend"]
  K <--> G["Thin SDLC Policy Adapter: CI/PR/QA, budget and approvals"]
  G --> GH["GitHub PR, CI, protected merge"]
- G --> OP["OpenProject business work items"]
+ G --> OP["Plane business work items"]
  SRE --> OBS["Monitoring + incident source"]
  OBS -->|"incident -> new intent"| PM
 ```
@@ -39,6 +39,10 @@ Refer to [15 — four logical components and their contracts](15-logical-boundar
 ## Hermes-native coordination decision
 
 **Current deployment design:** [16 — Hermes-native Gateway/Kanban, profiles and scaling](16-hermes-native-deployment.md). Hermes native **Kanban** is responsible for its **single-host** task board, dependencies, role dispatch, retry and profile lifecycle. The **Thin SDLC Policy Adapter** owns trusted acceptance decisions, external human approval and CI/QA/PR evidence, and only then authorizes downstream cards. It does not implement a duplicate task scheduler. The existing four logical concerns stay separate, but their implementation may be inside one host and shared stores. **A Kanban done/review state is never equal to approval.**
+
+## Plane and Telegram channel ownership
+
+[17 — Plane + Telegram integration](17-plane-telegram-integration.md) makes **Plane** the only business work source, **Telegram** the native Hermes Gateway conversational interface, and **native Kanban** the internal execution dispatcher. The Thin Bridge/Policy Adapter validates work-item ↔ Kanban task mapping, sends sanitized Telegram notifications and enforces real QA/CI/human gates. Do not expose raw Kanban retries or let Telegram chat substitute for protected approval. Plane references in older docs are historical.
 
 ## Role contracts
 
@@ -111,7 +115,7 @@ roles/
   specialist/<name>/SOUL.md
 ```
 
-Every task envelope minimally contains `project_id, work_item_id, task_id, stage, role_id, input_artifact_refs, acceptance_checks, allowed_tools, policy_version, budget_limit, timeout, attempt`. Every result contains `status, artifact_refs, evidence_refs, test_outcome, changes, risks, spend, model_alias, started_at, ended_at`. Work-item store and Git commit/PR link to each other. Source-of-truth decisions: **OpenProject** for business status/priority, **GitHub** for source and technical artifacts, **immutable private evidence store** for runtime evidence; each record carries stable IDs/commit SHA rather than maintaining divergent editable copies.
+Every task envelope minimally contains `project_id, work_item_id, task_id, stage, role_id, input_artifact_refs, acceptance_checks, allowed_tools, policy_version, budget_limit, timeout, attempt`. Every result contains `status, artifact_refs, evidence_refs, test_outcome, changes, risks, spend, model_alias, started_at, ended_at`. Work-item store and Git commit/PR link to each other. Source-of-truth decisions: **Plane** for business status/priority, **GitHub** for source and technical artifacts, **immutable private evidence store** for runtime evidence; each record carries stable IDs/commit SHA rather than maintaining divergent editable copies.
 
 ## Autonomy and approvals
 
@@ -127,7 +131,7 @@ Hard controls: scoped IAM and GitHub credentials, protected branches, per-role t
 ## Deployment split: same design, two implementation depths
 
 - **MVP (two days):** six role profiles, native local Hermes Kanban and single gateway where pinned Hermes is available, deterministic external SDLC acceptance checks, real LiteLLM/PR evidence, explicit manual approvals and DEV/demo only. Existing Python LocalStore scaffold is retained for contract tests but is NOT the preferred production dispatcher. If a real Hermes integration fails, report PARTIAL.
-- **Full:** begin with one private EC2/EBS Hermes host, native gateway-owned Kanban and profile workers; external policy checks, GitHub/OpenProject/LiteLLM and evidence backup. Scale vertically, then use independent Hermes hosts for separate workloads; DynamoDB/SQS/ECS are optional later for measured cross-host needs, not the default.
+- **Full:** begin with one private EC2/EBS Hermes host, native gateway-owned Kanban and profile workers; external policy checks, GitHub/Plane/LiteLLM and evidence backup. Scale vertically, then use independent Hermes hosts for separate workloads; DynamoDB/SQS/ECS are optional later for measured cross-host needs, not the default.
 
 ## Memory, learning, behavior and metrics
 

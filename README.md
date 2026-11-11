@@ -2,7 +2,7 @@
 
 > **STATUS: Architecture and implementation plans only — NOT deployed or implemented.**  
 > **Design baseline: 2026-11-05.** **Owner:** Human Founder / Product Owner.  
-> **Target:** Hermes-native Kanban + six profiles + thin SDLC governance; local 2-day MVP, then AWS single-host EC2/EBS with optional project sharding.
+> **Target:** Plane work management + Telegram messaging + Hermes-native Kanban execution + six profiles + thin SDLC governance; local 2-day MVP, then AWS single-host EC2/EBS with optional project sharding.
 
 ## Decision
 
@@ -22,10 +22,21 @@ flowchart LR
  X --> M["MAINTAIN: DevOps/SRE"]
  M --> P
  O -. scoped specialist consultation .-> SP["Security / UX / DBA / Cloud / Performance"]
- O --- SH["LiteLLM / GitHub / OpenProject / artifacts / audit"]
+ O --- SH["LiteLLM / GitHub / Plane / artifacts / audit"]
 ```
 
 **Key rule:** the AI Independent Reviewer generates risk/quality findings, **not a binding human approval**. Owner, named code owner, policy owner and release manager remain accountable for their designated approval gates. Tests, policies and CI are mandatory external checks, not self-assertions by an agent.
+
+## Plane + Telegram integration (2026-11-11)
+
+[17 — Plane, Telegram and Hermes integration](docs/17-plane-telegram-integration.md) is the current **business intake and communication decision**:
+
+- **Plane** replaces Plane as **the single business work-item source of truth**. We do not dual-write both trackers.
+- **Hermes native Kanban** remains the internal execution dispatcher and one-host task/run store; Plane status is *coarse business status*, not an independent worker scheduler.
+- **Telegram via the native Hermes Gateway** is the human chat/notification channel; one bot token belongs to one approved ingress profile, not all six worker profiles.
+- **Thin Plane–Hermes Bridge** syncs work IDs/status, validates Plane events and enforces SDLC/CI/QA/human approval before dispatching/unblocking cards. Telegram chat **cannot approve** protected merges/deployments by itself.
+- Single private **EC2 + EBS** host first; Telegram **outbound polling** requires no inbound port. Scale Hermes hosts only by independent project shard.
+- **No new live infrastructure or feature code is claimed**: this change documents integration and rollout gates; PR #10/#11 remain incomplete for native Kanban.
 
 ## Logical architecture — execution is not learning
 
@@ -42,7 +53,7 @@ flowchart LR
 
 ## Deployment default: Hermes-native Kanban
 
-[16 — Hermes-native Kanban deployment and scaling](docs/16-hermes-native-deployment.md) is the **current runtime/deployment decision**. One Hermes Gateway with an embedded Kanban dispatcher, six profiles, local SQLite on EBS, GitHub/OpenProject/LiteLLM and an external policy/approval adapter. Scale vertically first; use **independent hosts per project** rather than sharing Kanban SQLite. The four logical responsibilities in [15](docs/15-logical-boundary-architecture.md) remain conceptual and need not become microservices.
+[16 — Hermes-native Kanban deployment and scaling](docs/16-hermes-native-deployment.md) is the **current runtime/deployment decision**. One Hermes Gateway with an embedded Kanban dispatcher, six profiles, local SQLite on EBS, GitHub/Plane/LiteLLM and an external policy/approval adapter. Scale vertically first; use **independent hosts per project** rather than sharing Kanban SQLite. The four logical responsibilities in [15](docs/15-logical-boundary-architecture.md) remain conceptual and need not become microservices.
 
 **Implementation note:** PR #10/#11 contain an earlier local Python controller scaffold and have NOT demonstrated Hermes Kanban or end-to-end integrations. Review/repurpose them; do not launch two independent task dispatchers.
 
@@ -53,7 +64,7 @@ flowchart LR
 | Goal | One bounded, traceable 6-stage demo feature with a real PR/test run | Secure, durable AI-operated SDLC, including closed-loop maintenance |
 | Runtime | Local Hermes Gateway + Kanban board + six profiles, thin policy checker (requires smoke tests) | One private EC2 + EBS Hermes host; optional separate project hosts on demand |
 | Roles | 6 logical role profiles; one worker implementation; on-demand specialists not required | 6 isolated roles, specialists and governed concurrency |
-| Workflow | Markdown/JSON artifact handoffs, manual human gates, QA and independent review | OpenProject integration, stage gates, CI/evals, incident-triggered loops, telemetry |
+| Workflow | Markdown/JSON artifact handoffs, manual human gates, QA and independent review | Plane integration, stage gates, CI/evals, incident-triggered loops, telemetry |
 | Memory | Static instructions, bounded run history, proposed lessons only | Versioned per-role/project snapshots, approved skill promotion, simulations of mood based on measured outcomes |
 | Deploy | PR + DEV/demo validation only; **no production deploy** | Per-environment privileges, human-authorized production release and tested rollback |
 | Completion proof | Real artifact chain, tests, branch/PR, approval audit and negative gate tests | Security/reliability/incident/learning/portability end-to-end test suite |
@@ -72,10 +83,11 @@ flowchart LR
 
 ## Read first — authoritative plans
 
-1. [16 — Hermes-native deployment and scaling](docs/16-hermes-native-deployment.md)
-2. [08 — Six-stage target workflow and role contracts](docs/08-six-stage-role-target.md)
-3. [09 — Two-day MVP hour-by-hour execution plan and Definition of Done](docs/09-mvp-two-day-execution.md)
-4. [10 — Full implementation roadmap, waves F0–F5 and acceptance](docs/10-full-implementation-roadmap.md)
+1. [17 — Plane business management + Telegram messaging + Hermes execution](docs/17-plane-telegram-integration.md)
+2. [16 — Hermes-native deployment and scaling](docs/16-hermes-native-deployment.md)
+3. [08 — Six-stage target workflow and role contracts](docs/08-six-stage-role-target.md)
+4. [09 — Two-day MVP hour-by-hour execution plan and Definition of Done](docs/09-mvp-two-day-execution.md)
+5. [10 — Full implementation roadmap, waves F0–F5 and acceptance](docs/10-full-implementation-roadmap.md)
 
 ## Original reference designs (retained as detailed background)
 

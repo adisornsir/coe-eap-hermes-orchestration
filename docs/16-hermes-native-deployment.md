@@ -10,11 +10,15 @@ Use Hermes's native worker/board/run lifecycle rather than introducing another c
 
 Why EC2 over Fargate initially? Native Hermes Kanban is a **single-host SQLite/PID-local dispatcher** that spawns managed local worker processes, and user/system service-manager integration matters. A persistent EC2 host with EBS is a simpler fit for local mutable SQLite and process lifecycle than pretending ECS replicas can share the same Kanban database. **EC2 does not provide autoscaling of a single Kanban board**; add hosts only by sharding independent projects/workloads.
 
+## Accepted work/communication integrations
+
+[17 — Plane work management + Telegram](17-plane-telegram-integration.md) is now the authoritative integration design. **Plane replaces Plane as the only business work-item tracker**, while Hermes Kanban remains internal task dispatch/state. Telegram is connected to **one ingress profile via the native Hermes Gateway** using a single bot token and default outbound long polling from the private EC2 host. The **Thin Plane–Hermes Bridge** maps Plane IDs to native Kanban tasks, reconciles events, reports coarse business status and checks SDLC gates/human authorization. It does not implement its own worker scheduler. No production Telegram bot or Plane credentials are present in this design.
+
 ## Deployment topology — single host
 
 ~~~mermaid
 flowchart TB
-  H["Human Owner / Teams / Web (authenticated)"] --> CH["Hermes messaging/API channel"]
+  H["Human Owner / Telegram / Plane UI"] --> CH["Native Hermes Telegram messaging channel"]
   subgraph VPC["AWS private VPC — one Hermes host (EC2)"]
     CH --> GW["1 Hermes Gateway<br/>profile multiplex + Kanban dispatcher"]
     GW --> KB[("EBS local Hermes home<br/>Kanban SQLite + profiles/sessions")]
@@ -25,8 +29,11 @@ flowchart TB
     A --> TOOLS["Restricted local workspace and approved tools"]
   end
   GW --> LM["Gosoft LiteLLM gateway"]
+  H --> PW["Plane work-management UI / API"]
+  PW <--> PG
+  CH -. "sanitized notifications" .-> H
   PG --> GH["GitHub protected PR and CI"]
-  PG --> OP["OpenProject business work"]
+  PG --> OP["Plane business work"]
   KB -. "consistent backup/export, not a live shared mount" .-> S3[("Private S3 backups/evidence")]
   VPC --> CW["CloudWatch logs/alarms / SSM administration"]
 ~~~
@@ -42,7 +49,7 @@ flowchart TB
 | 6 SDLC acceptance, severity, budgets | Kanban cards represent work | **Enforceable policy/approval adapter** validates AC/CI/review/human identity | External approval system, CI/PR and audit evidence |
 | Agent identity / private working memory | Per-role Hermes profiles, sessions | Data classification and versioned approved memory promotion | Hermes profile home; approved S3/Git snapshots |
 | Agent skills | Hermes Skill handling | Reviewed source/version allowlist + independent promotion | Git source, optional approved S3 artifact |
-| GitHub code/CI & OpenProject | Agent/MCP tools | External SCM protections and business source of truth | GitHub and OpenProject |
+| GitHub code/CI & Plane | Agent/MCP tools | External SCM protections and business source of truth | GitHub and Plane |
 | Model routing and caps | Per-profile model settings | Central budgets, credentials, egress restrictions | Gosoft LiteLLM |
 | Backups and operational recovery | Local SQLite and run logs | Consistent backup, restore rehearsal, alarms | EBS snapshots and S3 export |
 
@@ -50,7 +57,7 @@ flowchart TB
 
 ## SDLC mapping: Kanban tasks rather than duplicate scheduler
 
-- Each feature/story gets a **project board** and a stable external OpenProject/GitHub ID mapping. Kanban boards provide local workspace/DB separation but **are not IAM isolation**.
+- Each feature/story gets a **project board** and a stable external Plane/GitHub ID mapping. Kanban boards provide local workspace/DB separation but **are not IAM isolation**.
 - Create explicit, dependency-linked cards for PLAN (pm-ba), DESIGN (sa), BUILD (dev), TEST (qa), REVIEW (reviewer), release preparation (devops-sre), and MAINTAIN (devops-sre). REVIEW is a task within the DEPLOY SDLC stage, not a seventh SDLC stage.
 - Start with **manual decomposition** (`kanban.auto_decompose: false`), which makes the six-stage graph and approval checkpoints predictable. Only turn on AI decomposition after cost/quality evaluations.
 - Set `kanban.review_dispatch: false` in the first pilot **if explicit separate Reviewer cards are used**. Otherwise a built-in reviewer dispatch may overlap the independent REVIEW card. Re-evaluate against a pinned Hermes release. This setting does not turn off the explicit reviewer profile's tasks.
@@ -67,6 +74,10 @@ flowchart TB
 | qa | TEST | independent test evidence | weaken AC to force green |
 | reviewer | DEPLOY review | Standards + Spec report with severity | edit own reviewed code and self-approve |
 | devops-sre | DEPLOY prep + MAINTAIN | DEV release plan, incident evidence | unattended production action |
+
+### Telegram ingress profile (native)
+
+Use [the Telegram config overlay](../examples/hermes-native/config.telegram.example.yaml) with **one approved channel profile owning the only Telegram bot token**. Do not duplicate bot tokens across multiplexed role profiles. For a private always-on EC2 instance choose outbound **long polling**, not a public Telegram webhook. In Full F1 validate numeric sender allowlist, connection status, sanitized notifications and authorized Plane status queries; enterprise approval remains external (see [17](17-plane-telegram-integration.md)).
 
 ## Starting configuration (example, not automatically applied)
 
@@ -96,7 +107,7 @@ See [Kanban + multiplex sample](../examples/hermes-native/config.kanban.example.
 |---|---|---|
 | **S1: One Host** | One Hermes installation, six profiles, one gateway dispatcher. Monitor 7–14 days. | A single host is a failure domain; restore must be proven |
 | **S2: Vertical Scale** | Increase EC2 CPU/RAM/EBS IOPS and tune Kanban concurrency based on model latency, provider RPM, memory and spend. | More parallel workers share host resources and local DB |
-| **S3: Horizontal by shard** | Route distinct projects/workloads to **independent** Hermes EC2 hosts and boards; use project routing registry and external GitHub/OpenProject IDs. | No shared SQLite writer; no replicated live Kanban across hosts |
+| **S3: Horizontal by shard** | Route distinct projects/workloads to **independent** Hermes EC2 hosts and boards; use project routing registry and external GitHub/Plane IDs. | No shared SQLite writer; no replicated live Kanban across hosts |
 | **S4: Optional central dispatcher** | Only if cross-host routing, failover or SLA demands it, add a central intake queue/router with stable task ids and idempotent downstream effects. | This is a **new control plane**, not an automatic Hermes feature |
 
 For a high-risk project, create a separate host **before** maximizing tenant density. Process/profile isolation on one host is not hard tenant isolation. Separate project boards on the same host provide organization and workspace scoping, not a dedicated security principal.

@@ -42,7 +42,7 @@ Arrow semantics: **approving a candidate** is separate from **accepting an SDLC 
 | Work evidence, checkpoints, tests, review/PR refs and event history | Local workitem files or native Hermes workspace/Kanban | EBS workspace and private S3 versioned evidence export; GitHub/CI links | Evidence; **not automatically personal memory** |
 | Role persona, profile and policy references | \`roles/<role>/SOUL.md\` in Git | Pinned Git / approved profile snapshot | Versioned identity; permission remains externally enforced |
 | Per-role lessons and preferences | Candidate \`lessons.md\` / runbook notes, **not auto-loaded** | S3 approved \`memory/<project>/<role>/<version>\` snapshots | Proposed → validated → approved; scoped and reversible |
-| Shared project knowledge | Explicit Markdown / source files | GitHub/OpenProject references plus scoped S3 snapshots | Project authoritative; no cross-project leakage |
+| Shared project knowledge | Explicit Markdown / source files | GitHub/Plane references plus scoped S3 snapshots | Project authoritative; no cross-project leakage |
 | \`SKILL.md\` definitions | Reviewed first-party local repo folders; fixed role/stage mapping | Git as source + approved, versioned immutable skill package | Procedures, not grants; evaluate changes before promotion |
 | Performance/mood | Optional derived audit summary | Validated event aggregates, derived display only | Not memory truth, not permission control |
 
@@ -122,6 +122,10 @@ This keeps **execution recovery** separate from **agent development**. Checkpoin
 
 This is a **mapping of logical contracts**, not a change to six SDLC stages, not four microservices and not a claim of live deployment. Full F1 starts EC2/EBS native recovery; F4 adds governed learning/promotion.
 
+## Plane and Telegram adapters
+
+The [Plane + Telegram integration contract](17-plane-telegram-integration.md) maps **Plane to WorkItemStore** (business source), **Telegram to Hermes Gateway Channel Adapter** (human ingress/notifications) and **native Hermes Kanban to DurableExecution** (single-host worker state, backed up/reconciled). The thin Bridge implements only IDs, coarse status sync and trusted SDLC gates. It is **not a second Dispatcher**. Neither Plane task comments nor Telegram messages can promote agent memory, grant tools, or count as authenticated code/release approval.
+
 ## MVP versus Full: non-inflating scope
 
 | Area | MVP Day 1/2 (existing PR #10/#11) | Full plan |
@@ -139,7 +143,7 @@ This is a **mapping of logical contracts**, not a change to six SDLC stages, not
 
 - **F0:** Freeze stable contracts and distinct names; add tests ensuring task history cannot become approved memory/skill without a promotion decision.
 - **F1:** Deploy native Hermes Gateway+Kanban on EC2/EBS; test consistent SQLite backup/restore, gateway restart and bounded retry; reconcile external GitHub/CI effects with stable IDs. Do **not** promise exactly-once execution or cross-host Kanban support. DynamoDB/S3/ECS may be introduced later only for proven need.
-- **F2:** Add complete role execution and actual GitHub/OpenProject references, QA and Reviewer handoffs with read-only memory retrieval and pinned skill versions.
+- **F2:** Add complete role execution and actual GitHub/Plane references, QA and Reviewer handoffs with read-only memory retrieval and pinned skill versions.
 - **F3:** Secure source access, authenticated approval, role/project permissions, restricted promotion credentials, retention, audit and negative security tests. Mandatory control gates precede any production-impact feature.
 - **F4:** AgentMemory and SkillManager governed learning: candidate → eval → human authorization → versioned promotion → rollback; measure quality, cost and simulated mood without changing privileges.
 - **F5:** Scale and portability only if necessary.
