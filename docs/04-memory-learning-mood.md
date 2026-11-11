@@ -13,7 +13,7 @@
 
 A newly approved memory or skill is loaded by the **next task**, not silently injected into an existing retry. Full F1 implements durable execution; F4 implements governed continuous learning. The two-day local MVP remains unchanged.
 
-**One role = one identity, not one always-on server.** Fargate tasks are replaceable. An agent's identity, history and approved skills survive via versioned stores. Mood is **a calculated operational presentation**, not genuine feelings or model consciousness.
+**One role = one identity, not one always-on server.** Hermes-native managed worker processes are replaceable on a single host. An agent's identity, history and approved skills survive via the host's profile storage and governed versioned backups. Mood is **a calculated operational presentation**, not genuine feelings or model consciousness.
 
 ## Memory and learning by source of truth
 
@@ -24,7 +24,7 @@ A newly approved memory or skill is loaded by the **next task**, not silently in
 | Personal memory | Compact learnings and conventions | Versioned per-role snapshot in S3 | One writer; controlled snapshot promotion |
 | Project memory | Decisions, APIs, AC, context | Git / OpenProject / S3 artifacts | Versioned and project-scoped |
 | Procedural skills | Checklists and reusable `SKILL.md` | Role-local + Git review | Stage → test → review → promote |
-| Performance | QA results, acceptance, rework, cost | DynamoDB events/aggregates | Controller records validated events |
+| Performance | QA results, acceptance, rework, cost | Native Kanban event history plus validated external CI/LiteLLM metrics; DynamoDB optional later | Trusted policy/CI checks normalize outcome evidence |
 | Mood state | Status label + metrics + reason | Derived from metrics; optionally cached | Rule-based, cannot grant authority |
 
 Hermes supports persistent `MEMORY.md`, `USER.md`, session search and skill creation. It has bounded prompt memory, and loaded memories are snapshots at session start. **Never treat the memory file as a multi-writer distributed store.**

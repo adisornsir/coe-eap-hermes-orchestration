@@ -12,12 +12,16 @@ Use [11 — selective vtno/skills integration](11-vtno-skills-adoption.md) as th
 
 **Release plan:** F0 freezes contracts; **F1** implements crash-safe DurableExecution; **F2** consumes pinned memory/skill snapshots while executing six stages; **F3** provides authenticated approval and isolation; **F4** adds controlled AgentMemory/SkillManager learning, evaluation, promotion and rollback. Running tasks never receive a silently changed knowledge/skill version. No change to 2-day MVP or six AI roles.
 
+## Default runtime now Hermes-native (2026-11-11)
+
+[16 — Hermes-native Kanban + single-host deployment](16-hermes-native-deployment.md) is the **current implementation target**. Prefer native Hermes Gateway, profile management, Kanban task dependency/dispatch and local run recovery. Keep one **thin external SDLC Policy Adapter**, not another multi-agent scheduler. The first AWS pilot uses **private EC2 + EBS + systemd gateway**, with S3 backup/evidence and existing LiteLLM/GitHub/OpenProject. **ECS Fargate + DynamoDB distributed worker designs below are historical alternatives**, not mandatory platform components. Scale up one host first; add **independent** Hermes hosts by project later (no shared live Kanban SQLite across hosts).
+
 ## Full end state
 
 - One Human Founder/Product Owner controls goal, prioritization, budget, exceptions and final production decisions.
 - One deterministic orchestration/control layer coordinates **6 core AI roles** (`pm-ba, sa, dev, qa, reviewer, devops-sre`) plus specialist pool only when needed.
 - All **Plan, Design, Build, Test, Deploy, Maintain** stages have versioned artifacts, repeatable checks, explicit human/policy gates and reject/rework transitions.
-- Runtime reuses lean [AWS target architecture](02-target-architecture.md): ECS Fargate Gateway/controller and isolated RunTask workers, DynamoDB state/leases and idempotency, S3 encrypted versioned artifacts/profile snapshots, existing LiteLLM + OpenProject + GitHub + CloudWatch. Optional EFS only for a single Gateway profile home when required; never shared writable profile SQLite among workers.
+- Runtime follows [16](16-hermes-native-deployment.md): one EC2 + EBS Hermes gateway hosting native Kanban and six profiles, local SQLite protected by consistent backups, external SDLC policy/approval gates, and existing LiteLLM + GitHub + OpenProject + CloudWatch. S3 stores approved backups/evidence, not a live shared SQLite database. Only later introduce more hosts by project shard when justified.
 - Role-specific persistent identity, project-scoped memory, approved learning/skills, objective performance signals and transparent **simulated mood** implemented as described in [memory design](04-memory-learning-mood.md).
 - Enforce security boundaries outside prompts; Reviewer cannot make its own approval binding; independent human code/release authority remains in force.
 
@@ -28,7 +32,7 @@ No fixed Full deadline is asserted. Estimate effort and staffing after the two-d
 | Wave | Focus | Key deliverables | Acceptance gate |
 |---|---|---|---|
 | F0 — baseline freeze | Stabilize MVP | Versioned schemas; golden demo; role/policy registry; real connector gap list; CI unit tests | Demo reproducible on clean machine; no fictitious results |
-| F1 — durable platform | Runtime/control plane | Gateway/controller service; worker image and CLI; ECS RunTask; DynamoDB task state/role lock/lease/fencing; S3 encrypted evidence/snapshots; IAM/Secrets; CloudWatch | Crash/restart/retry does not double-run or lose approved state; role-profile writes isolated |
+| F1 — Hermes-native operations | Runtime/hosting | Private EC2 + EBS, one Hermes gateway-embedded Kanban dispatcher, role profiles, monitored restarts, application-consistent SQLite backups, S3 evidence, IAM/Secrets/SSM/CloudWatch | One host restores correctly; retry reconciles GitHub side effects; no self-approval or duplicate protected action |
 | F2 — full six-stage execution | Product workflow | OpenProject work-item sync; approved `intent/spec/plan`; branch/PR integration; QA pipeline; independent Reviewer policy, release preparation and rollback runbooks; incidents -> Plan | One real sample story passes all six stages and all return paths with linked audit |
 | F3 — production governance | Risk/security and release | Branch protection, least privilege, network/egress policy, model/MCP allowlists, approvals outside prompts, per-env autonomy tiers, supply-chain/secret scanning, policy-as-code | Blocked unauthorized tool, self-merge, over-budget and production deployments proven in automated negative tests |
 | F4 — reliability, memory & learning | Continuous improvement | Stable role/project memory, versioned snapshot promotion, approval-gated skills, regression eval suite, feedback ingestion from QA/review/incidents, metrics + cost attribution, workload/mood display | Lessons survive worker restart; policy/skill change can be reverted; mood never alters authority |
@@ -53,10 +57,10 @@ F3 controls that are prerequisites for a particular deployment **must ship befor
 | Boundary | Selected implementation | Owned capability | Scaling/portability note |
 |---|---|---|---|
 | Owner entrypoint | Existing Hermes channel/Gateway (may be Telegram or UI) | Request intake, status, explicit approvals | Swap channel without changing workflow |
-| Workflow engine | Thin deterministic controller in Gateway service | Stages, gates, budgets, role assignment, event log, kill/retry | Workflow decisions are code/config, not untrusted LLM text |
-| Worker runtime | Same pinned Hermes image, role profile injected into isolated Fargate RunTask | Bounded AI reasoning and tool execution | Worker start/stop per assignment; no shared writable role home |
-| Task/state | DynamoDB | Work-item versions, idempotency, leases/fencing, audit index, role locks | Reconcile worker state on restart |
-| Artifact/memory | S3 versioned, encrypted; Git docs; OpenProject work items | Immutable evidence, role snapshots, source-of-truth links | Export standard JSON/Markdown and archives |
+| Coordination and workflow | Native Hermes Gateway + Kanban **plus thin SDLC policy adapter** | Native tasks, dependencies, role dispatch, retries; trusted external gates for scope/CI/QA/PR/human approval | One dispatcher, no duplicate controller; cards alone do not authorize transitions |
+| Worker runtime | Native Hermes local per-profile managed workers on EC2 | Role-scoped tasks, Skills, Memory, bounded tools | Scale concurrency inside one host; profile != security sandbox |
+| Task/state | Hermes Kanban SQLite on local encrypted EBS | Boards, task/run attempts, dependencies, local claim and retry evidence | Application-consistent backup/restore; single-host only |
+| Artifacts vs approved memory | Local Hermes home/workspace + scoped S3 backup/evidence; Git as source for approved Skills | Keep task results separate from approved learning and profiles | No automatic memory/skill promotion; project isolation enforced externally |
 | Model gateway | Existing LiteLLM | Model alias mapping, separate role keys, spend/limits, routing | Model-agnostic role definitions; no model name in role prompts |
 | SCM and CI | GitHub + existing CI | PRs, checks, merge protection, code owner | Dev agent cannot merge itself |
 | Work management | Existing OpenProject | Priorities, stories, acceptance, operational status | Single authoritative business work item |
@@ -68,11 +72,11 @@ F3 controls that are prerequisites for a particular deployment **must ship befor
 
 ### F1 — core reliability
 - [ ] Pin and verify Hermes version, noninteractive CLI behavior, tool/MCP semantics, memory approval behavior and LiteLLM protocol compatibility.
-- [ ] Make one worker image/profile loader that loads a **role and project-specific, immutable snapshot**; never share a writable Hermes home.
-- [ ] Controller: validated state transitions, idempotent task IDs, conditional leases/fencing tokens, bounded retries, dead-letter/block state, cancels and resumption.
-- [ ] ECS controller can launch only approved task definitions, subnets and task roles; all workers carry only task IDs and private artifact pointers.
-- [ ] S3 bucket policies, encryption, versioning, lifecycle and project/role path isolation; DynamoDB locking and consistent audit references.
-- [ ] Alarm and diagnose Gateway restart, expired lease, worker crash, token exhaustion, failed snapshot promotion.
+- [ ] Pin Hermes version and six profile definitions; verify gateway multiplex and native worker spawn on one EC2 host; never run multiple processes writing the same Hermes profile/board.
+- [ ] Use native Kanban dependency/dispatch/retry instead of duplicating a task scheduler; implement external SDLC gate checks for accepted Plan/Design, real QA/CI, review blockers and named human decisions.
+- [ ] Configure one gateway-owned dispatcher, explicit multi-profile/board ownership, worker limits and quotas; prove local process lifecycle with systemd and gateway restart.
+- [ ] Use local encrypted EBS for active SQLite/profile state; test SQLite-consistent backups and restore from an isolated host; S3 for private approved evidence/profile snapshots, not a live DB mount.
+- [ ] Alarm on gateway/worker crash, blocked cards, disk pressure, missing backup, credential expiry, LiteLLM budget and failed restore; reconcile duplicate external PR/CI effects.
 
 ### F2 — team operating system
 - [ ] Six `SOUL.md` role definitions; tool/permission matrix and per-role spend caps; optional specialist registry.
@@ -102,7 +106,7 @@ F3 controls that are prerequisites for a particular deployment **must ship befor
 
 ### F5 — scale & vendor flexibility
 - [ ] Multi-project namespaces, quotas and project isolation tests; tune concurrency only as review throughput permits.
-- [ ] Introduce queue/scheduler only after task volume proves controller polling insufficient.
+- [ ] First tune native Kanban concurrency and EC2 resources; introduce independent Hermes project hosts, central intake/router or external queue **only** after measuring bottlenecks.
 - [ ] Canary/rollback, rate limiting, performance/load exercises, disaster-recovery drill and cost/quality SLOs.
 - [ ] Contract tests for `ModelGateway, TaskRunner, WorkItemStore, ArtifactMemoryStore` with export/import to a non-AWS or non-Hermes backend.
 - [ ] Future UI only when chat/Markdown reporting demonstrably insufficient; no separate emotion engine.

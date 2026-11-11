@@ -38,15 +38,15 @@ Arrow semantics: **approving a candidate** is separate from **accepting an SDLC 
 
 | Data / owner | MVP storage | Full storage | Lifetime and trust |
 |---|---|---|---|
-| Work item stage, task attempt, retries, pending approvals | \`workitems/<id>/state.json\` | DynamoDB conditional writes | Execution record, controller only |
-| Work evidence, checkpoints, tests, review/PR refs and event history | \`workitems/<id>/*.md\`, \`events.jsonl\` | Private S3 versioned task prefixes + DynamoDB index | Evidence; **not automatically personal memory** |
+| Work item stage, task attempt and retries; approval evidence separate | Existing \`LocalStore\` JSON scaffold / native Kanban SQLite once tested | Native single-host Kanban SQLite on EBS; trusted approval references in external audit/PR system | Execution record; Kanban status alone is not approval |
+| Work evidence, checkpoints, tests, review/PR refs and event history | Local workitem files or native Hermes workspace/Kanban | EBS workspace and private S3 versioned evidence export; GitHub/CI links | Evidence; **not automatically personal memory** |
 | Role persona, profile and policy references | \`roles/<role>/SOUL.md\` in Git | Pinned Git / approved profile snapshot | Versioned identity; permission remains externally enforced |
 | Per-role lessons and preferences | Candidate \`lessons.md\` / runbook notes, **not auto-loaded** | S3 approved \`memory/<project>/<role>/<version>\` snapshots | Proposed → validated → approved; scoped and reversible |
 | Shared project knowledge | Explicit Markdown / source files | GitHub/OpenProject references plus scoped S3 snapshots | Project authoritative; no cross-project leakage |
 | \`SKILL.md\` definitions | Reviewed first-party local repo folders; fixed role/stage mapping | Git as source + approved, versioned immutable skill package | Procedures, not grants; evaluate changes before promotion |
 | Performance/mood | Optional derived audit summary | Validated event aggregates, derived display only | Not memory truth, not permission control |
 
-**Shared S3 or DynamoDB is acceptable.** Use separate namespaces, IAM policy, writer ownership and retention. Do not merge task history and agent memory into one freely editable \`MEMORY.md\`. S3 versioning alone is not an immutable security boundary; enforce write permissions/retention and capture content hashes, and use stronger object-lock controls where policy requires them.
+**Shared cloud storage for approved evidence and memory is acceptable, but live Kanban SQLite remains on one local host.** Use separate namespaces, IAM policy, writer ownership and retention. Do not merge task history and agent memory into one freely editable \`MEMORY.md\`. S3 versioning alone is not an immutable security boundary; enforce write permissions/retention and capture content hashes, and use stronger object-lock controls where policy requires them.
 
 ### Proposed Full prefixes (illustrative, not deployed)
 
@@ -110,15 +110,27 @@ The literal values are an **illustrative schema**, not real stored data. For a n
 
 This keeps **execution recovery** separate from **agent development**. Checkpoint resumption should restore the previous task's versioned context, not accidentally load fresh unapproved memory.
 
+## Hermes-native implementation mapping (supersedes Fargate-first examples below)
+
+[16 — Hermes-native deployment architecture](16-hermes-native-deployment.md) maps these four logical concerns to **one host**:
+
+- `WorkflowController` becomes a **thin policy/approval gate adapter**; Hermes Kanban handles dispatch/dependencies, not a custom second scheduler.
+- `DurableExecution` starts as **Hermes native Kanban SQLite on EBS**, plus external evidence refs and application-consistent backup/recovery. Native crash recovery is not globally exactly-once for GitHub/CI side-effects.
+- `AgentMemory` starts with Hermes per-profile memory plus **separate approved project/role snapshots**; candidates do not automatically become approved memory.
+- `SkillManager` resolves vetted Hermes Skills; source/version + eval/approval control remain outside `SKILL.md`.
+- `AgentWorker` is a Hermes local managed profile process. **No ECS RunTask per worker in the first deployment.**
+
+This is a **mapping of logical contracts**, not a change to six SDLC stages, not four microservices and not a claim of live deployment. Full F1 starts EC2/EBS native recovery; F4 adds governed learning/promotion.
+
 ## MVP versus Full: non-inflating scope
 
 | Area | MVP Day 1/2 (existing PR #10/#11) | Full plan |
 |---|---|---|
 | WorkflowController | Existing local deterministic \`core.py\`, manual approval record, one task at a time | Authenticated external gates, robust policy checks |
-| DurableExecution | Same \`LocalStore\` JSON/Markdown; best-effort local restart state | F1: DynamoDB conditional state/leases/idempotency, S3 evidence, ECS worker recovery |
+| DurableExecution | Native Kanban SQLite after Hermes preflight; existing LocalStore retained only as scaffold/contract tests | F1: EC2/EBS gateway-owned Kanban, consistent backup/restore, external side-effect reconciliation |
 | AgentMemory | **No autonomous persistent learning**; optional human-reviewed \`lessons.md\`, kept separate from \`state.json\` | F4: per-role/project versioned snapshots, approved promotion, rollback |
 | SkillManager | Reviewed local \`skills/*.md\` and explicit \`skills.py\` allowlist/provenance in PR #10 | F4: registry, eval, secure promotion/revocation and version reconciliation |
-| AgentWorker | Existing PLAN/DESIGN LiteLLM adapter + partial Day 2 scaffold | F1/F2: real isolated Hermes workers across six stages |
+| AgentWorker | Require Hermes Kanban profile-worker real run; existing Python adapter remains partial scaffold | F1/F2: native Hermes per-profile workers and bounded concurrency on one host |
 | Multi-service infrastructure | None | Deploy components together initially; split only on measured operational need |
 
 **MVP code status:** PR #10 and stacked PR #11 are not merged; their local \`LocalStore\` and Skill Loader are **partial implementations**, not an AgentMemory service or authenticated enterprise runtime. Do not add Fargate, queues, network APIs, a vector database or automatic skill learning to the 16-hour MVP.
@@ -126,7 +138,7 @@ This keeps **execution recovery** separate from **agent development**. Checkpoin
 ## Full sequencing and gates
 
 - **F0:** Freeze stable contracts and distinct names; add tests ensuring task history cannot become approved memory/skill without a promotion decision.
-- **F1:** Deliver DurableExecution (DynamoDB/S3/ECS) with tasks surviving controller restart, exactly-once *state transitions* via conditional writes and **effectively-once** external side-effects via idempotency/reconciliation. Do **not** promise mathematically exactly-once execution across GitHub/CI/model APIs.
+- **F1:** Deploy native Hermes Gateway+Kanban on EC2/EBS; test consistent SQLite backup/restore, gateway restart and bounded retry; reconcile external GitHub/CI effects with stable IDs. Do **not** promise exactly-once execution or cross-host Kanban support. DynamoDB/S3/ECS may be introduced later only for proven need.
 - **F2:** Add complete role execution and actual GitHub/OpenProject references, QA and Reviewer handoffs with read-only memory retrieval and pinned skill versions.
 - **F3:** Secure source access, authenticated approval, role/project permissions, restricted promotion credentials, retention, audit and negative security tests. Mandatory control gates precede any production-impact feature.
 - **F4:** AgentMemory and SkillManager governed learning: candidate → eval → human authorization → versioned promotion → rollback; measure quality, cost and simulated mood without changing privileges.
