@@ -51,7 +51,7 @@ Follow [15 — four logical component contracts](15-logical-boundary-architectur
 
 **Cut rule:** when time slips, cut all P1 and UI work, then reduce demo feature complexity. **Never cut tests, reviewer independence, approval/secret guardrails or audit linkage** to claim a successful P0 demo.
 
-## Execution board — Day 1 (8 hours)
+## Historical custom-controller execution board — Day 1 (superseded by native-first board above)
 
 | Block | Task | Deliverable / check |
 |---|---|---|
@@ -62,7 +62,7 @@ Follow [15 — four logical component contracts](15-logical-boundary-architectur
 
 **Day 1 exit gate:** controller starts from a single documented command, all six profiles load, a real Plan/Design flow runs with linked artifacts, and Owner can approve/reject before Build. If CLI/API bridge is incompatible, record the blocker and demonstrably separate a mock adapter; do not report a real Hermes success.
 
-## Execution board — Day 2 (8 hours)
+## Historical custom-controller execution board — Day 2 (superseded by native-first board above)
 
 | Block | Task | Deliverable / check |
 |---|---|---|
@@ -73,7 +73,7 @@ Follow [15 — four logical component contracts](15-logical-boundary-architectur
 
 **Day 2 exit gate:** trace the same `work_item_id` through six stages; show real code/test/PR evidence; QA and Reviewer were not the author of the implementation; demo cannot run production writes.
 
-## Minimal repo implementation layout (proposed, not existing)
+## Historical custom-controller repo layout (reference only, not the Hermes-native deployment)
 
 ```text
 src/hermes_orchestration/
@@ -94,7 +94,7 @@ Keep integration adapters small. The current AWS operational direction is one EC
 
 ## Definition of Done (binary: checked only with evidence)
 
-- [ ] A single command executes the documented local controller with a pinned runtime.
+- [ ] A pinned Hermes Gateway with gateway-owned Kanban dispatcher can be started from documented commands; actual cards spawn named profile workers, while the external policy adapter enforces approval gates.
 - [ ] Six logical profiles exist, carry distinct role/tool policies, and each is invoked for its stage or explicitly classified as blocked.
 - [ ] Six stages are present, including allowed reject/feedback transitions; illegal transitions fail closed.
 - [ ] `intent.md`, `spec.md`, `plan.md`, build and test evidence, independent `review-report.md`, `release-record.md` and maintenance feedback exist for **one ID**.

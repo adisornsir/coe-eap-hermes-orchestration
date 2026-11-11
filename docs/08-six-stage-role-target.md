@@ -4,36 +4,37 @@
 
 ## Executive decision
 
-**1 Human Founder/Product Owner + 1 deterministic Hermes Orchestrator + 6 logical core AI roles + on-demand specialist profiles.** There are six SDLC *processes*, but no requirement for six servers or six concurrently running model sessions. Use one reusable worker image, role-specific instruction/tool policy, and bounded per-task invocations. The orchestrator is workflow/control software, **not the PM and not an independent approval authority**.
+**1 Human Founder/Product Owner + 1 Hermes-native Gateway/Kanban coordination plane + 1 thin deterministic SDLC Policy Adapter + 6 logical core AI roles + on-demand specialist profiles.** There are six SDLC processes, but no need for six servers or always-running models. Hermes Kanban owns local task dispatch and worker lifecycle; the external adapter checks stage acceptance, independent CI/review evidence and named approvals. A chat/orchestrator profile is neither the PM by default nor an independent approval authority.
 
 References: Anthropic, *The AI-Native SDLC Playbook* (2026), stages Plan/Design/Build/Test/Deploy/Maintain; adopt artifact handoffs, feedback, independent checks and human production gates without assuming a Claude-only implementation.
 
 ```mermaid
 flowchart TD
- O["Human Owner: goals, budget and final approvals"] --> C["Hermes controller: task router, state machine, gates, audit"]
- C --> PM["PM / BA"]
- C --> SA["Solution Architect"]
- C --> DEV["Developer"]
- C --> QA["QA / Tester"]
- C --> REV["Independent Reviewer"]
- C --> SRE["DevOps / SRE"]
- C -. "on-demand bounded task" .-> SP["Specialists: security, UX, DB, cloud, performance"]
- C <--> W[("Work item + artifacts + history")]
- C --> LM["LiteLLM model routing and spend"]
- C --> RUN["Worker runner: local in MVP / Hermes Kanban on single host"]
- RUN --> GH["GitHub branches, PRs, CI"]
- W --> OP["OpenProject business work items"]
+ O["Human Owner: goals, budget and approvals"] --> A["Hermes Gateway / Channel"]
+ A --> K["Hermes native Kanban: board + dispatcher + worker runs"]
+ K --> PM["PM/BA profile"]
+ K --> SA["Solution Architect profile"]
+ K --> DEV["Developer profile"]
+ K --> QA["QA profile"]
+ K --> REV["Independent Reviewer profile"]
+ K --> SRE["DevOps/SRE profile"]
+ K -. "bounded consult" .-> SP["Specialists on demand"]
+ K --> DB[("Local Kanban SQLite on one host / EBS")]
+ K --> L["LiteLLM model routing and spend"]
+ K <--> G["Thin SDLC Policy Adapter: CI/PR/QA, budget and approvals"]
+ G --> GH["GitHub PR, CI, protected merge"]
+ G --> OP["OpenProject business work items"]
  SRE --> OBS["Monitoring + incident source"]
  OBS -->|"incident -> new intent"| PM
 ```
 
 ## Skills are procedures, not roles or authority
 
-The five skills studied in [11 — selective vtno/skills adoption](11-vtno-skills-adoption.md) strengthen **how** existing roles execute tasks, without adding new AI roles or changing the six-stage controller. The adaptation prioritizes one bounded implementation PR, independent two-axis review (**Standards** and **Spec**), caller-defined interfaces and reproducible tests. The task envelope may include `skill_id` and `skill_version` or a Git SHA for evidence; those fields are **not** permissions. The controller, role tool policy, QA evidence and named human approval retain authority. Do not install upstream skills into workers automatically or execute downloaded scripts.
+The five skill patterns studied in [11 — selective vtno/skills adoption](11-vtno-skills-adoption.md) strengthen **how** existing roles execute tasks, without adding roles or changing the six-stage governance contract; Hermes Kanban now owns dispatch and the thin policy adapter owns gates. The adaptation prioritizes one bounded implementation PR, independent two-axis review (**Standards** and **Spec**), caller-defined interfaces and reproducible tests. The task envelope may include `skill_id` and `skill_version` or a Git SHA for evidence; those fields are **not** permissions. The controller, role tool policy, QA evidence and named human approval retain authority. Do not install upstream skills into workers automatically or execute downloaded scripts.
 
 ## Four logical boundaries under one orchestrator
 
-Refer to [15 — four logical components and their contracts](15-logical-boundary-architecture.md). Keep **WorkflowController** (policy/SDLC decisions), **DurableExecution** (attempt state/recovery/evidence), **AgentMemory** (approved role/project knowledge), and **SkillManager** (approved reusable procedures) separate as *interfaces*, even if they run in one process and share AWS S3/DynamoDB infrastructure. `AgentWorker` executes bounded tasks using pinned profile, memory, and skill versions. **Execution logs are evidence, not automatically promoted learning.** No new AI roles or mandatory services are added.
+Refer to [15 — four logical components and their contracts](15-logical-boundary-architecture.md). Keep **WorkflowController** (policy/SDLC decisions), **DurableExecution** (attempt state/recovery/evidence), **AgentMemory** (approved role/project knowledge), and **SkillManager** (approved reusable procedures) separate as *interfaces*, even if they run on a single Hermes host with local EBS-backed Kanban and optional S3 backup. `AgentWorker` executes bounded tasks using pinned profile, memory, and skill versions. **Execution logs are evidence, not automatically promoted learning.** No new AI roles or mandatory services are added.
 
 ## Hermes-native coordination decision
 

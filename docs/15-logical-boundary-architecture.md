@@ -38,15 +38,15 @@ Arrow semantics: **approving a candidate** is separate from **accepting an SDLC 
 
 | Data / owner | MVP storage | Full storage | Lifetime and trust |
 |---|---|---|---|
-| Work item stage, task attempt, retries, pending approvals | \`workitems/<id>/state.json\` | DynamoDB conditional writes | Execution record, controller only |
-| Work evidence, checkpoints, tests, review/PR refs and event history | \`workitems/<id>/*.md\`, \`events.jsonl\` | Private S3 versioned task prefixes + DynamoDB index | Evidence; **not automatically personal memory** |
+| Work item stage, task attempt and retries; approval evidence separate | Existing \`LocalStore\` JSON scaffold / native Kanban SQLite once tested | Native single-host Kanban SQLite on EBS; trusted approval references in external audit/PR system | Execution record; Kanban status alone is not approval |
+| Work evidence, checkpoints, tests, review/PR refs and event history | Local workitem files or native Hermes workspace/Kanban | EBS workspace and private S3 versioned evidence export; GitHub/CI links | Evidence; **not automatically personal memory** |
 | Role persona, profile and policy references | \`roles/<role>/SOUL.md\` in Git | Pinned Git / approved profile snapshot | Versioned identity; permission remains externally enforced |
 | Per-role lessons and preferences | Candidate \`lessons.md\` / runbook notes, **not auto-loaded** | S3 approved \`memory/<project>/<role>/<version>\` snapshots | Proposed → validated → approved; scoped and reversible |
 | Shared project knowledge | Explicit Markdown / source files | GitHub/OpenProject references plus scoped S3 snapshots | Project authoritative; no cross-project leakage |
 | \`SKILL.md\` definitions | Reviewed first-party local repo folders; fixed role/stage mapping | Git as source + approved, versioned immutable skill package | Procedures, not grants; evaluate changes before promotion |
 | Performance/mood | Optional derived audit summary | Validated event aggregates, derived display only | Not memory truth, not permission control |
 
-**Shared S3 or DynamoDB is acceptable.** Use separate namespaces, IAM policy, writer ownership and retention. Do not merge task history and agent memory into one freely editable \`MEMORY.md\`. S3 versioning alone is not an immutable security boundary; enforce write permissions/retention and capture content hashes, and use stronger object-lock controls where policy requires them.
+**Shared cloud storage for approved evidence and memory is acceptable, but live Kanban SQLite remains on one local host.** Use separate namespaces, IAM policy, writer ownership and retention. Do not merge task history and agent memory into one freely editable \`MEMORY.md\`. S3 versioning alone is not an immutable security boundary; enforce write permissions/retention and capture content hashes, and use stronger object-lock controls where policy requires them.
 
 ### Proposed Full prefixes (illustrative, not deployed)
 
